@@ -28,157 +28,156 @@
       margin: 0;
       font-size: 14px;
       color: #777;
+      text-transform: uppercase;
+      font-weight: 600;
     }
     .value {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: bold;
-      margin: 8px 0;
+      margin: 6px 0;
     }
     .unit {
-      font-size: 14px;
-      color: #999;
-    }
-    .icon {
-      font-size: 32px;
-      margin-bottom: 5px;
+      font-size: 16px;
+      color: #444;
+      display: inline-block;
+      margin-left: 2px;
     }
     .sub {
       font-size: 12px;
       color: #777;
     }
+    .updated {
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      color: #888;
+      margin-top: 20px;
+    }
     canvas {
-      width: 80px !important;
+      width: 100% !important;
       height: 80px !important;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-gauges/gauge.min.js"></script>
 </head>
 <body>
-
-  <!-- Cards -->
   <div class="card">
-    <h3>TEMPERATURE</h3>
+    <h3>Temperature</h3>
     <canvas id="tempGauge"></canvas>
-    <div class="value" id="temperature">--</div>
-    <div class="unit">°C</div>
+    <div class="value"><span id="temperature">--</span><span class="unit">°C</span></div>
   </div>
 
   <div class="card">
-    <h3>DEW POINT</h3>
-    <div class="icon">💧</div>
-    <div class="value" id="dewPoint">--</div>
-    <div class="unit">°C</div>
+    <h3>Dew Point</h3>
+    <div class="value"><span id="dewPoint">--</span><span class="unit">°C</span></div>
   </div>
 
   <div class="card">
-    <h3>HUMIDITY</h3>
+    <h3>Humidity</h3>
     <canvas id="humidityGauge"></canvas>
-    <div class="value" id="humidity">--</div>
-    <div class="unit">%</div>
+    <div class="value"><span id="humidity">--</span><span class="unit">%</span></div>
+    <div class="sub">HUMID</div>
   </div>
 
   <div class="card">
-    <h3>WIND</h3>
+    <h3>Wind</h3>
     <canvas id="windGauge"></canvas>
-    <div class="value" id="wind">--</div>
-    <div class="unit">kph</div>
-    <div class="sub" id="windGust">Gust: -- kph</div>
-    <div class="sub" id="windDirLabel">Direction: --</div>
+    <div class="value"><span id="wind">--</span><span class="unit">kph</span></div>
+    <div class="sub" id="windGust">GUSTS -- KPH</div>
+    <div class="sub" id="windDirLabel">---° ---</div>
   </div>
 
   <div class="card">
-    <h3>PRECIPITATION</h3>
-    <div class="icon">🌧️</div>
-    <div class="value" id="rain">--</div>
-    <div class="unit">mm/hr</div>
-    <div class="sub" id="rainDaily">Daily: -- mm</div>
-    <div class="sub" id="rainMonthly">Monthly: -- mm</div>
+    <h3>Precipitation</h3>
+    <canvas id="rainGauge"></canvas>
+    <div class="value"><span id="rain">--</span><span class="unit">mm</span></div>
+    <div class="sub" id="rainRate">-- MM/HR</div>
   </div>
 
   <div class="card">
-    <h3>PRESSURE</h3>
+    <h3>Pressure</h3>
     <canvas id="pressureGauge"></canvas>
-    <div class="value" id="pressure">--</div>
-    <div class="unit">hPa</div>
+    <div class="value"><span id="pressure">--</span><span class="unit">hPa</span></div>
   </div>
 
   <div class="card">
     <h3>UV</h3>
-    <div class="icon">🔆</div>
-    <div class="value" id="uv">--</div>
-    <div class="unit">index</div>
+    <canvas id="uvGauge"></canvas>
+    <div class="value"><span id="uv">--</span></div>
+    <div class="sub" id="uvLabel">--</div>
   </div>
 
   <div class="card">
-    <h3>RADIATION</h3>
-    <div class="icon">☀️</div>
-    <div class="value" id="radiation">--</div>
-    <div class="unit">W/m²</div>
+    <h3>Radiation</h3>
+    <canvas id="radiationGauge"></canvas>
+    <div class="value"><span id="radiation">--</span><span class="unit">W/m²</span></div>
   </div>
+
+  <div class="updated" id="lastUpdated">Updated: --</div>
 
   <script>
     const tempGauge = new RadialGauge({
       renderTo: 'tempGauge',
-      width: 100,
-      height: 100,
-      units: "°C",
       minValue: 0,
       maxValue: 50,
       majorTicks: ["0","10","20","30","40","50"],
       highlights: [{ from: 35, to: 50, color: "rgba(255,0,0,.3)" }],
       value: 0,
-      animation: false
+      animation: true
     }).draw();
 
     const humidityGauge = new RadialGauge({
       renderTo: 'humidityGauge',
-      width: 100,
-      height: 100,
-      units: "%",
       minValue: 0,
       maxValue: 100,
       majorTicks: ["0","20","40","60","80","100"],
-      highlights: [{ from: 80, to: 100, color: "rgba(0,0,255,.3)" }],
       value: 0,
-      animation: false
+      animation: true
     }).draw();
 
     const pressureGauge = new RadialGauge({
       renderTo: 'pressureGauge',
-      width: 100,
-      height: 100,
-      units: "hPa",
       minValue: 950,
       maxValue: 1050,
       majorTicks: ["950","970","990","1010","1030","1050"],
       value: 0,
-      animation: false
+      animation: true
+    }).draw();
+
+    const uvGauge = new RadialGauge({
+      renderTo: 'uvGauge',
+      minValue: 0,
+      maxValue: 11,
+      majorTicks: ["0","2","4","6","8","10","11+"],
+      value: 0,
+      animation: true
     }).draw();
 
     const windGauge = new RadialGauge({
       renderTo: 'windGauge',
-      width: 100,
-      height: 100,
       minValue: 0,
-      maxValue: 360,
-      majorTicks: ["N","NE","E","SE","S","SW","W","NW"],
-      minorTicks: 2,
-      ticksAngle: 360,
-      startAngle: 0,
-      colorMajorTicks: "#ddd",
-      colorMinorTicks: "#ddd",
-      colorNumbers: "transparent",
-      colorPlate: "#222",
-      borders: false,
-      needleType: "arrow",
-      needleWidth: 2,
-      needleCircleSize: 7,
-      needleCircleOuter: true,
-      needleCircleInner: false,
-      animationDuration: 1500,
-      animationRule: "linear",
-      valueBox: false,
-      value: 0
+      maxValue: 50,
+      majorTicks: ["0","10","20","30","40","50"],
+      value: 0,
+      animation: true
+    }).draw();
+
+    const rainGauge = new RadialGauge({
+      renderTo: 'rainGauge',
+      minValue: 0,
+      maxValue: 50,
+      majorTicks: ["0","10","20","30","40","50"],
+      value: 0,
+      animation: true
+    }).draw();
+
+    const radiationGauge = new RadialGauge({
+      renderTo: 'radiationGauge',
+      minValue: 0,
+      maxValue: 1200,
+      majorTicks: ["0","200","400","600","800","1000","1200"],
+      value: 0,
+      animation: true
     }).draw();
 
     function fahrenheitToCelsius(f) {
@@ -198,26 +197,24 @@
     }
 
     function degreesToCompass(deg) {
-      const directions = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
-      return directions[Math.round(deg / 22.5) % 16];
+      const dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+      return dirs[Math.round(deg / 22.5) % 16];
     }
 
     async function fetchData() {
       try {
-        const response = await fetch("https://weatherstation.bryanespano7.workers.dev/");
-        const json = await response.json();
+        const res = await fetch("https://weatherstation.bryanespano7.workers.dev/");
+        const json = await res.json();
         const d = json.data;
 
         const tempC = fahrenheitToCelsius(d.outdoor.temperature.value);
         const dewC = fahrenheitToCelsius(d.outdoor.dew_point.value);
-        const humidity = d.outdoor.humidity.value; // Fixed line
+        const humidity = d.outdoor.humidity.value;
         const wind = mphToKph(d.wind.wind_speed.value);
         const windGust = mphToKph(d.wind.wind_gust.value);
         const windDir = d.wind.wind_direction.value;
-        const windCompass = degreesToCompass(windDir);
         const rainRate = inToMM(d.rainfall.rain_rate.value);
         const rainDaily = inToMM(d.rainfall.daily.value);
-        const rainMonthly = inToMM(d.rainfall.monthly.value);
         const pressure = inHgTohPa(d.pressure.relative.value);
         const uv = d.solar_and_uvi.uvi.value;
         const solar = d.solar_and_uvi.solar.value;
@@ -226,22 +223,29 @@
         document.getElementById("dewPoint").textContent = dewC;
         document.getElementById("humidity").textContent = humidity;
         document.getElementById("wind").textContent = wind;
-        document.getElementById("windGust").textContent = `Gust: ${windGust} kph`;
-        document.getElementById("windDirLabel").textContent = `Direction: ${windCompass}`;
-        document.getElementById("rain").textContent = rainRate;
-        document.getElementById("rainDaily").textContent = `Daily: ${rainDaily} mm`;
-        document.getElementById("rainMonthly").textContent = `Monthly: ${rainMonthly} mm`;
+        document.getElementById("windGust").textContent = `GUSTS ${windGust} KPH`;
+        document.getElementById("windDirLabel").textContent = `${windDir}° ${degreesToCompass(windDir)}`;
+        document.getElementById("rain").textContent = rainDaily;
+        document.getElementById("rainRate").textContent = `${rainRate} MM/HR`;
         document.getElementById("pressure").textContent = pressure;
         document.getElementById("uv").textContent = uv;
+        document.getElementById("uvLabel").textContent = uv < 3 ? "LOW" : uv < 6 ? "MODERATE" : "HIGH";
         document.getElementById("radiation").textContent = solar;
 
         tempGauge.value = tempC;
         humidityGauge.value = humidity;
         pressureGauge.value = pressure;
-        windGauge.value = windDir;
+        uvGauge.value = uv;
+        windGauge.value = wind;
+        rainGauge.value = rainRate;
+        radiationGauge.value = solar;
+
+        const now = new Date();
+        const options = { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' };
+        document.getElementById("lastUpdated").textContent = `Updated: ${now.toLocaleString('en-US', options)}`;
 
       } catch (err) {
-        console.error("Data load failed:", err);
+        console.error("Error loading data:", err);
       }
     }
 
