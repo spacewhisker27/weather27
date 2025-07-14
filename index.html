@@ -17,8 +17,8 @@
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 220px;
-      height: 220px;
+      width: 240px;
+      height: 230px;
       margin: 10px;
       padding: 10px;
       text-align: center;
@@ -38,189 +38,156 @@
       font-size: 14px;
       color: #999;
     }
-    .icon {
-      font-size: 32px;
-      margin-bottom: 5px;
-    }
     .sub {
       font-size: 12px;
-      color: #777;
+      color: #666;
     }
     .updated {
-      font-size: 11px;
-      color: #aaa;
       position: absolute;
-      bottom: 5px;
+      bottom: 8px;
       left: 0;
-      width: 100%;
+      right: 0;
+      font-size: 11px;
+      color: #888;
+    }
+    .icon {
+      font-size: 32px;
+      margin: 5px 0;
     }
     .glow {
-      animation: glow 1.5s infinite alternate;
+      animation: glow 1s ease-in-out infinite alternate;
     }
     @keyframes glow {
       from {
-        text-shadow: 0 0 5px #f39c12;
+        text-shadow: 0 0 5px yellow;
       }
       to {
-        text-shadow: 0 0 20px #f39c12;
+        text-shadow: 0 0 15px orange;
       }
+    }
+    .compass {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+    }
+    .needle {
+      transform-origin: 50% 50%;
+      transition: transform 1s ease-out;
+      fill: red;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-gauges/gauge.min.js"></script>
 </head>
 <body>
 
-  <!-- Cards -->
-  <div class="card">
-    <h3>TEMPERATURE</h3>
-    <canvas id="tempGauge"></canvas>
-    <div class="value" id="temperature">--</div>
-    <div class="unit">°C</div>
-    <div class="updated" id="updatedTemp">Updated: --</div>
-  </div>
-
-  <div class="card">
-    <h3>DEW POINT</h3>
-    <div class="icon">💧</div>
-    <div class="value" id="dewPoint">--</div>
-    <div class="unit">°C</div>
-    <div class="updated" id="updatedDew">Updated: --</div>
-  </div>
-
-  <div class="card">
-    <h3>HUMIDITY</h3>
-    <canvas id="humidityGauge"></canvas>
-    <div class="value" id="humidity">--</div>
-    <div class="unit">%</div>
-    <div class="updated" id="updatedHumidity">Updated: --</div>
-  </div>
-
+  <!-- Wind Card with Compass -->
   <div class="card">
     <h3>WIND</h3>
-    <div class="icon" id="windArrow" style="transform: rotate(0deg);">🧽</div>
+    <svg viewBox="0 0 100 100" class="compass">
+      <circle cx="50" cy="50" r="45" stroke="#999" stroke-width="4" fill="none" />
+      <text x="50" y="15" font-size="10" text-anchor="middle">N</text>
+      <text x="85" y="53" font-size="10" text-anchor="middle">E</text>
+      <text x="50" y="95" font-size="10" text-anchor="middle">S</text>
+      <text x="15" y="53" font-size="10" text-anchor="middle">W</text>
+      <polygon id="needle" class="needle" points="50,20 47,50 53,50" />
+    </svg>
     <div class="value" id="wind">--</div>
     <div class="unit">kph</div>
     <div class="sub" id="windGust">Gust: -- kph</div>
     <div class="sub" id="windDirLabel">Direction: --</div>
-    <div class="updated" id="updatedWind">Updated: --</div>
+    <div class="updated" id="windTime">Updated: --</div>
   </div>
 
+  <!-- Rain Card with Animation -->
   <div class="card">
     <h3>PRECIPITATION</h3>
-    <div class="icon" id="rainIcon">☔️</div>
+    <div class="icon" id="rainIcon">🌧️</div>
     <div class="value" id="rain">--</div>
     <div class="unit">mm/hr</div>
     <div class="sub" id="rainDaily">Daily: -- mm</div>
     <div class="sub" id="rainMonthly">Monthly: -- mm</div>
-    <div class="updated" id="updatedRain">Updated: --</div>
+    <div class="updated" id="rainTime">Updated: --</div>
   </div>
 
+  <!-- UV Card with Glow -->
   <div class="card">
-    <h3>PRESSURE</h3>
-    <canvas id="pressureGauge"></canvas>
-    <div class="value" id="pressure">--</div>
-    <div class="unit">hPa</div>
-    <div class="updated" id="updatedPressure">Updated: --</div>
-  </div>
-
-  <div class="card">
-    <h3>UV</h3>
-    <div class="icon" id="uvIcon">🌆</div>
+    <h3>UV INDEX</h3>
+    <div class="icon" id="uvIcon">🔆</div>
     <div class="value" id="uv">--</div>
     <div class="unit">index</div>
-    <div class="updated" id="updatedUV">Updated: --</div>
+    <div class="updated" id="uvTime">Updated: --</div>
   </div>
 
-  <div class="card">
-    <h3>RADIATION</h3>
-    <div class="icon">☀️</div>
-    <div class="value" id="radiation">--</div>
-    <div class="unit">W/m²</div>
-    <div class="updated" id="updatedRadiation">Updated: --</div>
-  </div>
+  <!-- Other cards (temperature, pressure, humidity etc.) can follow here... -->
 
   <script>
-    const tempGauge = new RadialGauge({ renderTo: 'tempGauge', width: 100, height: 100, minValue: 0, maxValue: 50, majorTicks: ["0","10","20","30","40","50"], highlights: [{ from: 35, to: 50, color: "rgba(255,0,0,.3)" }], value: 0 }).draw();
-    const humidityGauge = new RadialGauge({ renderTo: 'humidityGauge', width: 100, height: 100, minValue: 0, maxValue: 100, majorTicks: ["0","20","40","60","80","100"], highlights: [{ from: 80, to: 100, color: "rgba(0,0,255,.3)" }], value: 0 }).draw();
-    const pressureGauge = new RadialGauge({ renderTo: 'pressureGauge', width: 100, height: 100, minValue: 950, maxValue: 1050, majorTicks: ["950","970","990","1010","1030","1050"], value: 0 }).draw();
-
-    function formatTime(unixTime) {
-      const date = new Date(unixTime * 1000);
-      return date.toLocaleTimeString();
-    }
-
     function fahrenheitToCelsius(f) {
       return ((parseFloat(f) - 32) * 5 / 9).toFixed(1);
     }
-    function inHgTohPa(inHg) {
-      return (parseFloat(inHg) * 33.8639).toFixed(2);
-    }
+
     function inToMM(inches) {
       return (parseFloat(inches) * 25.4).toFixed(1);
     }
+
     function mphToKph(mph) {
       return (parseFloat(mph) * 1.60934).toFixed(1);
     }
+
     function degreesToCompass(deg) {
       const directions = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
       return directions[Math.round(deg / 22.5) % 16];
     }
 
+    function formatTimestamp(unix) {
+      const date = new Date(parseInt(unix) * 1000);
+      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+      return date.toLocaleString('en-US', options);
+    }
+
     async function fetchData() {
       try {
-        const response = await fetch("https://weatherstation.bryanespano7.workers.dev/");
-        const json = await response.json();
+        const res = await fetch("https://weatherstation.bryanespano7.workers.dev/");
+        const json = await res.json();
         const d = json.data;
 
-        const tempC = fahrenheitToCelsius(d.outdoor.temperature.value);
-        const dewC = fahrenheitToCelsius(d.outdoor.dew_point.value);
-        const humidity = d.outdoor.humidity.value;
-        const wind = mphToKph(d.wind.wind_speed.value);
-        const windGust = mphToKph(d.wind.wind_gust.value);
-        const windDir = d.wind.wind_direction.value;
+        const windKph = mphToKph(d.wind.wind_speed.value);
+        const windGustKph = mphToKph(d.wind.wind_gust.value);
+        const windDir = parseFloat(d.wind.wind_direction.value);
         const windCompass = degreesToCompass(windDir);
+        const windTime = formatTimestamp(d.wind.wind_speed.time);
+
         const rainRate = inToMM(d.rainfall.rain_rate.value);
         const rainDaily = inToMM(d.rainfall.daily.value);
         const rainMonthly = inToMM(d.rainfall.monthly.value);
-        const pressure = inHgTohPa(d.pressure.relative.value);
-        const uv = d.solar_and_uvi.uvi.value;
-        const solar = d.solar_and_uvi.solar.value;
-        const updatedTime = formatTime(json.time);
+        const rainTime = formatTimestamp(d.rainfall.rain_rate.time);
 
-        document.getElementById("temperature").textContent = tempC;
-        document.getElementById("dewPoint").textContent = dewC;
-        document.getElementById("humidity").textContent = humidity;
-        document.getElementById("wind").textContent = wind;
-        document.getElementById("windGust").textContent = `Gust: ${windGust} kph`;
+        const uv = d.solar_and_uvi.uvi.value;
+        const uvTime = formatTimestamp(d.solar_and_uvi.uvi.time);
+
+        // Wind updates
+        document.getElementById("wind").textContent = windKph;
+        document.getElementById("windGust").textContent = `Gust: ${windGustKph} kph`;
         document.getElementById("windDirLabel").textContent = `Direction: ${windCompass}`;
+        document.getElementById("windTime").textContent = `Updated: ${windTime}`;
+        document.getElementById("needle").style.transform = `rotate(${windDir}deg)`;
+
+        // Rain updates
         document.getElementById("rain").textContent = rainRate;
         document.getElementById("rainDaily").textContent = `Daily: ${rainDaily} mm`;
         document.getElementById("rainMonthly").textContent = `Monthly: ${rainMonthly} mm`;
-        document.getElementById("pressure").textContent = pressure;
+        document.getElementById("rainTime").textContent = `Updated: ${rainTime}`;
+
+        const rainIcon = document.getElementById("rainIcon");
+        parseFloat(rainRate) > 0 ? rainIcon.classList.add("glow") : rainIcon.classList.remove("glow");
+
+        // UV updates
         document.getElementById("uv").textContent = uv;
-        document.getElementById("radiation").textContent = solar;
-
-        tempGauge.value = tempC;
-        humidityGauge.value = humidity;
-        pressureGauge.value = pressure;
-        document.getElementById("windArrow").style.transform = `rotate(${windDir}deg)`;
-
-        // Add updated times
-        document.getElementById("updatedTemp").textContent = `Updated: ${updatedTime}`;
-        document.getElementById("updatedDew").textContent = `Updated: ${updatedTime}`;
-        document.getElementById("updatedHumidity").textContent = `Updated: ${updatedTime}`;
-        document.getElementById("updatedWind").textContent = `Updated: ${updatedTime}`;
-        document.getElementById("updatedRain").textContent = `Updated: ${updatedTime}`;
-        document.getElementById("updatedPressure").textContent = `Updated: ${updatedTime}`;
-        document.getElementById("updatedUV").textContent = `Updated: ${updatedTime}`;
-        document.getElementById("updatedRadiation").textContent = `Updated: ${updatedTime}`;
-
-        // Glow icons if high UV or rainfall
-        document.getElementById("uvIcon").classList.toggle("glow", parseInt(uv) >= 6);
-        document.getElementById("rainIcon").classList.toggle("glow", parseFloat(rainRate) >= 2);
+        document.getElementById("uvTime").textContent = `Updated: ${uvTime}`;
+        const uvIcon = document.getElementById("uvIcon");
+        parseFloat(uv) >= 6 ? uvIcon.classList.add("glow") : uvIcon.classList.remove("glow");
 
       } catch (err) {
-        console.error("Data load failed:", err);
+        console.error("Error fetching data:", err);
       }
     }
 
