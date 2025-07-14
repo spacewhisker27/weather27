@@ -41,53 +41,14 @@
 </head>
 <body>
 
-  <div class="card">
-    <h3>TEMPERATURE</h3>
-    <div class="value" id="temperature">--</div>
-    <div class="unit">°C</div>
-  </div>
-
-  <div class="card">
-    <h3>DEW POINT</h3>
-    <div class="value" id="dewPoint">--</div>
-    <div class="unit">°C</div>
-  </div>
-
-  <div class="card">
-    <h3>HUMIDITY</h3>
-    <div class="value" id="humidity">--</div>
-    <div class="unit">%</div>
-  </div>
-
-  <div class="card">
-    <h3>WIND</h3>
-    <div class="value" id="wind">--</div>
-    <div class="unit">kph</div>
-  </div>
-
-  <div class="card">
-    <h3>PRECIPITATION</h3>
-    <div class="value" id="rain">--</div>
-    <div class="unit">mm/hr</div>
-  </div>
-
-  <div class="card">
-    <h3>PRESSURE</h3>
-    <div class="value" id="pressure">--</div>
-    <div class="unit">hPa</div>
-  </div>
-
-  <div class="card">
-    <h3>UV</h3>
-    <div class="value" id="uv">--</div>
-    <div class="unit">index</div>
-  </div>
-
-  <div class="card">
-    <h3>RADIATION</h3>
-    <div class="value" id="radiation">--</div>
-    <div class="unit">W/m²</div>
-  </div>
+  <div class="card"><h3>TEMPERATURE</h3><div class="value" id="temperature">--</div><div class="unit">°C</div></div>
+  <div class="card"><h3>DEW POINT</h3><div class="value" id="dewPoint">--</div><div class="unit">°C</div></div>
+  <div class="card"><h3>HUMIDITY</h3><div class="value" id="humidity">--</div><div class="unit">%</div></div>
+  <div class="card"><h3>WIND</h3><div class="value" id="wind">--</div><div class="unit">kph</div></div>
+  <div class="card"><h3>PRECIPITATION</h3><div class="value" id="rain">--</div><div class="unit">mm/hr</div></div>
+  <div class="card"><h3>PRESSURE</h3><div class="value" id="pressure">--</div><div class="unit">hPa</div></div>
+  <div class="card"><h3>UV</h3><div class="value" id="uv">--</div><div class="unit">index</div></div>
+  <div class="card"><h3>RADIATION</h3><div class="value" id="radiation">--</div><div class="unit">W/m²</div></div>
 
   <script>
     function fahrenheitToCelsius(f) {
@@ -100,26 +61,27 @@
 
     async function fetchData() {
       try {
-        const response = await fetch("https://<your-worker-name>.workers.dev");
+        const response = await fetch("https://weatherstation.bryanespano7.workers.dev/");
         const json = await response.json();
         const d = json.data;
 
+        // ✅ SAFELY get each value from the correct object path
         document.getElementById("temperature").textContent = fahrenheitToCelsius(d.outdoor.temperature.value);
         document.getElementById("dewPoint").textContent = fahrenheitToCelsius(d.outdoor.dew_point.value);
         document.getElementById("humidity").textContent = d.outdoor.humidity.value;
-        document.getElementById("wind").textContent = (parseFloat(d.wind.wind_speed.value) * 1.60934).toFixed(1); // mph to kph
-        document.getElementById("rain").textContent = (parseFloat(d.rainfall.rain_rate.value) * 25.4).toFixed(1); // in/hr to mm/hr
+        document.getElementById("wind").textContent = (parseFloat(d.wind.wind_speed.value) * 1.60934).toFixed(1);
+        document.getElementById("rain").textContent = (parseFloat(d.rainfall.rain_rate.value) * 25.4).toFixed(1);
         document.getElementById("pressure").textContent = inHgTohPa(d.pressure.relative.value);
         document.getElementById("uv").textContent = d.solar_and_uvi.uvi.value;
         document.getElementById("radiation").textContent = d.solar_and_uvi.solar.value;
 
       } catch (err) {
-        console.error("Weather data fetch error:", err);
+        console.error("Failed to fetch or parse data:", err);
       }
     }
 
     fetchData();
-    setInterval(fetchData, 60000); // update every 60 sec
+    setInterval(fetchData, 60000); // refresh every 60 seconds
   </script>
 </body>
 </html>
