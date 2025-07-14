@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live Weather Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 150px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .label {
+      font-size: 12px;
+      color: gray;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .value {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .unit {
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cards -->
+  <div class="card"><div class="label">Temperature</div><div class="value" id="temperature">--</div><div class="unit">°C</div></div>
+  <div class="card"><div class="label">Dew Point</div><div class="value" id="dewPoint">--</div><div class="unit">°C</div></div>
+  <div class="card"><div class="label">Humidity</div><div class="value" id="humidity">--</div><div class="unit">%</div></div>
+  <div class="card"><div class="label">Wind</div><div class="value" id="wind">--</div><div class="unit">kph</div></div>
+  <div class="card"><div class="label">Precipitation</div><div class="value" id="rain">--</div><div class="unit">mm</div></div>
+  <div class="card"><div class="label">Pressure</div><div class="value" id="pressure">--</div><div class="unit">hPa</div></div>
+  <div class="card"><div class="label">UV</div><div class="value" id="uv">--</div><div class="unit">index</div></div>
+  <div class="card"><div class="label">Radiation</div><div class="value" id="radiation">--</div><div class="unit">W/m²</div></div>
+
+  <script>
+    const proxyURL = "https://weatherstation.bryanespano7.workers.dev"; // Replace with your Cloudflare Worker URL
+
+    async function fetchData() {
+      try {
+        const response = await fetch(proxyURL);
+        const data = await response.json();
+        const rt = data.data?.outdoor || {};
+
+        document.getElementById("temperature").textContent = rt.temp || "--";
+        document.getElementById("dewPoint").textContent = rt.dew_point || "--";
+        document.getElementById("humidity").textContent = rt.humidity || "--";
+        document.getElementById("wind").textContent = rt.wind_speed || "--";
+        document.getElementById("rain").textContent = rt.rain_rate || "--";
+        document.getElementById("pressure").textContent = rt.barometer || "--";
+        document.getElementById("uv").textContent = rt.uv || "--";
+        document.getElementById("radiation").textContent = rt.solar_radiation || "--";
+      } catch (err) {
+        console.error("Failed to fetch weather data:", err);
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 60 * 1000); // refresh every 1 minute
+  </script>
+</body>
+</html>
