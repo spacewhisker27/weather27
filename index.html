@@ -1,220 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Live Weather Dashboard</title>
-  <!-- Font Awesome for icons -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-pap9tE1I5dxfQLgZrW+X5iHexoQ3vMxRC9u2uV+avzFdVYlWVWwbQ9x4f+5BEGSM+INNQ4zAGi6w7xK+5hG+gA=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.9.6/build/player/lottie.min.js"></script>
   <style>
     body {
-      background: #f2f2f2;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Roboto', sans-serif;
       margin: 0;
-      padding: 20px;
+      background: #f0f0f0;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .updated {
-      font-size: 0.9rem;
-      color: #555;
-      margin-bottom: 20px;
-    }
-    #dashboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 20px;
-      width: 100%;
-      max-width: 1200px;
+      padding: 20px;
     }
-    .card {
+
+    .widget {
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      width: 280px;
+      padding: 20px;
       text-align: center;
-      position: relative;
+      transition: transform 0.3s ease;
     }
-    .card .icon {
-      font-size: 2rem;
-      margin-bottom: 10px;
-      transition: filter 0.3s;
+
+    .widget:hover {
+      transform: translateY(-5px);
     }
-    .card .label {
-      font-size: 0.85rem;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+
+    .icon-container {
+      height: 150px;
     }
-    .card .value {
-      font-size: 1.6rem;
+
+    .main-value {
+      font-size: 32px;
       font-weight: bold;
+    }
+
+    .secondary-value {
+      color: #777;
       margin-top: 5px;
     }
 
-    /* Glow animation for icons */
-    @keyframes glow {
-      from { filter: drop-shadow(0 0 5px currentColor); }
-      to   { filter: drop-shadow(0 0 20px currentColor); }
-    }
-    .glow {
-      animation: glow 1s ease-in-out infinite alternate;
+    .wind-arrow {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto;
+      transition: transform 0.5s ease;
     }
 
-    /* Compass arrow for wind */
-    .compass {
-      position: relative;
-      width: 60px;
-      height: 60px;
-      margin: 0 auto 10px;
+    .wind-arrow svg {
+      transform-origin: center;
     }
-    .compass .arrow {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      width: 2px;
-      height: 40%;
-      background: #333;
-      transform-origin: bottom center;
-      transition: transform 0.5s, background 0.5s;
-    }
-    .compass .arrow::after {
-      content: '';
-      position: absolute;
-      top: -8px;
-      left: -6px;
-      width: 12px;
-      height: 12px;
-      background: inherit;
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    }
+
+    .low { fill: #6dd47e; }
+    .moderate { fill: #ffcc00; }
+    .high { fill: #ff7f50; }
+    .extreme { fill: #e63946; }
   </style>
 </head>
 <body>
+  <div class="widget">
+    <div class="title">Temperature</div>
+    <div class="icon-container" id="temp-icon"></div>
+    <div class="main-value">30.5°C</div>
+    <div class="secondary-value">Feels like 32.1°C</div>
+  </div>
 
-  <div class="updated" id="updated">Updated: --</div>
+  <div class="widget">
+    <div class="title">Humidity</div>
+    <div class="icon-container" id="humidity-icon"></div>
+    <div class="main-value">74%</div>
+    <div class="secondary-value">Humid</div>
+  </div>
 
-  <div id="dashboard">
-    <div class="card">
-      <div class="icon"><i id="temp-icon" class="fa-solid fa-temperature-half"></i></div>
-      <div class="label">Temperature</div>
-      <div class="value" id="temperature-value">--</div>
-    </div>
+  <div class="widget">
+    <div class="title">Wind</div>
+    <div class="wind-arrow" id="wind-arrow"></div>
+    <div class="main-value">8.6 kph</div>
+    <div class="secondary-value">Gusts 16.2 kph<br>245° WSW</div>
+  </div>
 
-    <div class="card">
-      <div class="icon"><i id="humidity-icon" class="fa-solid fa-droplet"></i></div>
-      <div class="label">Humidity</div>
-      <div class="value" id="humidity-value">--</div>
-    </div>
+  <div class="widget">
+    <div class="title">Precipitation</div>
+    <div class="icon-container" id="rain-icon"></div>
+    <div class="main-value">0 mm</div>
+    <div class="secondary-value">0 mm/hr</div>
+  </div>
 
-    <div class="card">
-      <div class="icon"><i id="dewpoint-icon" class="fa-solid fa-cloud-rain"></i></div>
-      <div class="label">Dew Point</div>
-      <div class="value" id="dewpoint-value">--</div>
-    </div>
+  <div class="widget">
+    <div class="title">UV Index</div>
+    <div class="icon-container" id="uv-icon"></div>
+    <div class="main-value">2</div>
+    <div class="secondary-value">Low</div>
+  </div>
 
-    <div class="card">
-      <div class="compass">
-        <div id="wind-arrow" class="arrow"></div>
-      </div>
-      <div class="label">Wind</div>
-      <div class="value" id="wind-speed-value">--</div>
-      <div class="label" style="font-size:.75rem; margin-top:4px;" id="wind-dir-value">--</div>
-    </div>
-
-    <div class="card">
-      <div class="icon"><i id="gust-icon" class="fa-solid fa-wind"></i></div>
-      <div class="label">Wind Gust</div>
-      <div class="value" id="wind-gust-value">--</div>
-    </div>
-
-    <div class="card">
-      <div class="icon"><i id="rain-icon" class="fa-solid fa-cloud-showers-heavy"></i></div>
-      <div class="label">Rain Today</div>
-      <div class="value" id="rain-today-value">--</div>
-    </div>
-
-    <div class="card">
-      <div class="icon"><i id="rain-mo-icon" class="fa-solid fa-calendar-day"></i></div>
-      <div class="label">Rain This Month</div>
-      <div class="value" id="rain-month-value">--</div>
-    </div>
-
-    <div class="card">
-      <div class="icon"><i id="pressure-icon" class="fa-solid fa-gauge-high"></i></div>
-      <div class="label">Pressure</div>
-      <div class="value" id="pressure-value">--</div>
-    </div>
-
-    <div class="card">
-      <div class="icon"><i id="uv-icon" class="fa-solid fa-sun"></i></div>
-      <div class="label">UV Index</div>
-      <div class="value" id="uv-value">--</div>
-    </div>
-
-    <div class="card">
-      <div class="icon"><i id="solar-icon" class="fa-solid fa-solar-panel"></i></div>
-      <div class="label">Solar Radiation</div>
-      <div class="value" id="solar-value">--</div>
-    </div>
+  <div class="widget">
+    <div class="title">Radiation</div>
+    <div class="icon-container" id="radiation-icon"></div>
+    <div class="main-value">258.1</div>
+    <div class="secondary-value">W/m²</div>
   </div>
 
   <script>
-    const apiUrl = 'https://weatherstation.bryanespano7.workers.dev/';
+    const lottieIcons = {
+      'temp-icon': 'https://assets10.lottiefiles.com/packages/lf20_zskcb1is.json',
+      'humidity-icon': 'https://assets2.lottiefiles.com/packages/lf20_5KjvW6.json',
+      'rain-icon': 'https://assets2.lottiefiles.com/packages/lf20_XYoKxz.json',
+      'uv-icon': 'https://assets4.lottiefiles.com/packages/lf20_dgjK9A.json',
+      'radiation-icon': 'https://assets5.lottiefiles.com/packages/lf20_d6bnhydq.json'
+    };
 
-    function updateDashboard() {
-      fetch(apiUrl)
-        .then(res => res.json())
-        .then(json => {
-          const out = json.data.outdoor;
+    Object.entries(lottieIcons).forEach(([id, path]) => {
+      lottie.loadAnimation({
+        container: document.getElementById(id),
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path
+      });
+    });
 
-          // Core metrics
-          document.getElementById('temperature-value').textContent = out.temperature.value + out.temperature.unit;
-          document.getElementById('humidity-value').textContent    = out.humidity.value + (out.humidity.unit || '%');
-          document.getElementById('dewpoint-value').textContent    = out.dew_point.value + (out.dew_point.unit || '°C');
-          document.getElementById('wind-speed-value').textContent  = out.wind_speed.value + (out.wind_speed.unit || 'km/h');
-          document.getElementById('wind-dir-value').textContent    = out.wind_direction.value + '°';
-          document.getElementById('wind-gust-value').textContent   = out.wind_gust.value + (out.wind_gust.unit || 'km/h');
-          document.getElementById('rain-today-value').textContent  = out.rain_1d.value + (out.rain_1d.unit || 'mm');
-          document.getElementById('rain-month-value').textContent  = out.rain_1m.value + (out.rain_1m.unit || 'mm');
-          document.getElementById('pressure-value').textContent    = out.pressure.value + out.pressure.unit;
-          document.getElementById('uv-value').textContent          = out.uv.value;
-          document.getElementById('solar-value').textContent       = out.solar_radiation.value + out.solar_radiation.unit;
+    const windSpeed = 8.6; // dynamic value
+    const direction = 245; // dynamic value
+    const arrowColor = windSpeed > 30 ? 'extreme' : windSpeed > 20 ? 'high' : windSpeed > 10 ? 'moderate' : 'low';
 
-          // Glow animations
-          document.getElementById('uv-icon').classList.toggle('glow', out.uv.value > 8);
-          document.getElementById('rain-icon').classList.toggle('glow', parseFloat(out.rain_1h.value) > 0);
+    const arrowSvg = `
+      <svg viewBox="0 0 100 100">
+        <polygon points="50,10 65,50 50,40 35,50" class="${arrowColor}" />
+      </svg>`;
 
-          // Compass arrow
-          const arrow = document.getElementById('wind-arrow');
-          const dir   = parseFloat(out.wind_direction.value);
-          arrow.style.transform = `rotate(${dir}deg)`;
-          const spd = parseFloat(out.wind_speed.value);
-          arrow.style.background = spd < 10 ? 'green' : spd < 20 ? 'orange' : 'red';
-
-          // Timestamp
-          const ts = parseInt(out.temperature.time) * 1000;
-          const fmt = new Date(ts).toLocaleString('en-US', {
-            month: 'long', day: 'numeric', year: 'numeric',
-            hour: 'numeric', minute: 'numeric', hour12: true
-          });
-          document.getElementById('updated').textContent = `Updated: ${fmt}`;
-        })
-        .catch(err => console.error('Fetch error:', err));
-    }
-
-    // Initial load + refresh every 60 seconds
-    updateDashboard();
-    setInterval(updateDashboard, 60_000);
+    const arrow = document.getElementById('wind-arrow');
+    arrow.innerHTML = arrowSvg;
+    arrow.firstElementChild.style.transform = `rotate(${direction}deg)`;
   </script>
-
 </body>
 </html>
