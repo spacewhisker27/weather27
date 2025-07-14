@@ -19,7 +19,7 @@
     body{font-family:"Segoe UI",sans-serif;background:var(--bg-body);display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;min-height:100vh;}
     h1{font-size:clamp(1.5rem,2vw+1rem,2.25rem);font-weight:600;color:var(--clr-text-dark);margin-bottom:1.5rem;text-align:center;}
 
-    #forecastBar{width:100%;max-width:1200px;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem 1.5rem;margin-bottom:1.5rem;font-size:1.15rem;font-weight:600;text-align:center;transition:color .3s ease;}
+    #forecastBar{width:100%;max-width:1200px;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem 1.5rem;margin-bottom:1.5rem;font-size:1.15rem;font-weight:600;text-align:center;color:var(--clr-text-dark);transition:color .3s ease;}
     #forecastBar.good{color:var(--accent-good);}#forecastBar.bad{color:var(--accent-bad);}#forecastBar.neutral{color:var(--clr-text-dark);}
 
     .dashboard{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;}
@@ -56,45 +56,113 @@ const inHg2hPa = x=>(parseFloat(x)*33.8639).toFixed(2);
 const mph2kph = m=>(parseFloat(m)*1.60934).toFixed(1);
 const ins2mm = i=>(parseFloat(i)*25.4).toFixed(1);
 const deg2comp = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16];
-const tsTime = t=> t? new Date(t*1000).toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit',hour12:true}) : '--';
 const tsDate = t=> t? new Date(t*1000).toLocaleString('en-PH',{year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true}) : '--';
 
-/***** Extremes fetch using history API *****/
-async function fetchExtremes(){
+function getSeason(month){
+  if(month>=5 && month<=8) return 'wet';
+  if(month===4 || month===9) return 'transition';
+  if(month>=3 && month<=4) return 'hot';
+  return 'dry';
+}
+
+function genForecast(pNow, trend3h, windDir, windKph, tempC, humidity){
+  const month = new Date().getMonth();
+  const season = getSeason(month);
+
+  /* dynamic thresholds */
+  const TH_STEADY = season==='dry'? 0.5 : 0.7;
+  const RAPID_FALL = season==='dry'? -1.2 : -0.9;
+  const SLOW_FALL  = season==='dry'? -0.7 : -0.5;
+  const HUMID_HIGH = 85;
+  const TEMP_HOT   = 31;
+  const WIND_MONSOON = 15; // kph
+
+  const wetDirs = ['SW','WSW','W'];
+
+  const h = new Date().getHours();
+  const partOfDay = h<12? 'later this afternoon': h<18? 'this evening':'overnight';
+
+  /* Severe / heavy rain check */
+  if((trend3h<=RAPID_FALL && pNow<1008) || (windKph>=WIND_MONSOON && wetDirs.includes(windDir) && pNow<1010)){
+    return {txt:'Heavy rain or thunderstorms likely in the next 2–3 hours.',cls:'bad'};
+  }
+
+  /* Likely showers with high humidity & heat */
+  if(humidity>=HUMID_HIGH && tempC>=TEMP_HOT){
+    if(trend3h<=SLOW_FALL || wetDirs.includes(windDir) || season!=='dry'){
+      return {txt:`Rain showers likely ${season==='wet'? 'in the next 3–6 hours' : partOfDay}.`,cls:'bad'};
+    }
+  }
+
+  /* Isolated showers trigger */
+  if(season!=='dry' && trend3h<-TH_STEADY){
+    return {txt:`Isolated rain showers possible ${partOfDay}.`,cls:'bad'};
+  }
+
+  /* Clearing criteria */
+  if(trend3h>TH_STEADY && humidity<80){
+    return {txt:'Skies clearing, weather improving within the next few hours.',cls:'good'};
+  }
+
+  /* Fair when high pressure, low humidity */
+  if(pNow>1013 && humidity<70){
+    return {txt:'Fair and mostly sunny. No rain expected in the next 3–6 hours.',cls:'good'};
+  }
+
+  return {txt:'Partly cloudy with only a slight chance of showers.',cls:'neutral'};
+}
+
+/***** Fetch loop *****/
+async function fetchData(){
   try{
-    const today = new Date();
-    const ymd = today.toISOString().split('T')[0]; // YYYY-MM-DD
-    // Per Ecowitt v3 docs page 19: /v3/device/history?date=YYYY-MM-DD&type=day
-    const url = `https://weatherstation.bryanespano7.workers.dev/history?date=${ymd}&type=day`;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('history fetch failed');
-    const js = await res.json();
-    /* Expected structure
-       js.data.temp_max, temp_max_time, temp_min, temp_min_time, hum_max, hum_max_time, hum_min, hum_min_time
-       Adjust below if actual keys differ.
-    */
-    const ex = js.data;
-    const tempMax = ex.temp_max; const tempMaxT = ex.temp_max_time;
-    const tempMin = ex.temp_min; const tempMinT = ex.temp_min_time;
-    const humMax  = ex.hum_max;  const humMaxT  = ex.hum_max_time;
-    const humMin  = ex.hum_min;  const humMinT  = ex.hum_min_time;
+    const res = await fetch('https://weatherstation.bryanespano7.workers.dev/');
+    const {data:d} = await res.json();
 
-    document.getElementById('tempExtremes').textContent =
-      `H ${tempMax? tempMax.toFixed(1)+'°C ('+tsTime(tempMaxT)+')':'--'} / L ${tempMin? tempMin.toFixed(1)+'°C ('+tsTime(tempMinT)+')':'--'}`;
-    document.getElementById('humExtremes').textContent =
-      `H ${humMax??'--'}% (${tsTime(humMaxT)}) / L ${humMin??'--'}% (${tsTime(humMinT)})`;
+    const tempC = parseFloat(f2c(d.outdoor.temperature.value));
+    const humidityPct = parseFloat(d.outdoor.humidity.value);
+    const windDirDeg = parseFloat(d.wind.wind_direction.value);
+    const windDir = deg2comp(windDirDeg);
+    const windKph = parseFloat(mph2kph(d.wind.wind_speed.value));
 
-  }catch(e){console.warn('extremes unavailable',e);} }
+    // Update UI values
+    document.getElementById('temperature').textContent = tempC.toFixed(1);
+    document.getElementById('dewPoint').textContent    = f2c(d.outdoor.dew_point.value);
+    document.getElementById('humidity').textContent    = humidityPct;
+    document.getElementById('wind').textContent        = windKph.toFixed(1);
+    document.getElementById('windDir').textContent     = windDir;
+    document.getElementById('windGust').textContent    = `Gust ${mph2kph(d.wind.wind_gust.value)} km/h`;
+    document.getElementById('rain').textContent        = ins2mm(d.rainfall.rain_rate.value);
+    document.getElementById('rainDaily').textContent   = `Daily ${ins2mm(d.rainfall.daily.value||0)} mm`;
+    document.getElementById('rainMonthly').textContent = `Monthly ${ins2mm(d.rainfall.monthly.value||0)} mm`;
 
-/***** fetchData (real‑time) omitted for brevity, keep existing logic *****/
+    const presHpa = parseFloat(inHg2hPa(d.pressure.relative.value));
+    document.getElementById('pressure').textContent    = presHpa.toFixed(2);
+    document.getElementById('uv').textContent          = d.solar_and_uvi.uvi.value;
+    document.getElementById('radiation').textContent   = d.solar_and_uvi.solar.value;
+    document.getElementById('updatedAt').textContent   = `Updated: ${tsDate(d.outdoor.temperature.time)}`;
 
-// existing fetchData() function here ...
+    // Compute 3‑hour pressure trend
+    const now = Date.now();
+    const hist = JSON.parse(localStorage.getItem('pressureHist')||'[]');
+    hist.push({t:now,p:presHpa});
+    while(hist.length && (now - hist[0].t) > 4*3600*1000) hist.shift();
+    localStorage.setItem('pressureHist',JSON.stringify(hist));
+    let trend3h = 0;
+    if(hist.length>=2){
+      const ref = hist.find(h=> (now-h.t) > 2.5*3600*1000);
+      if(ref){ trend3h = (presHpa - ref.p)/((now-ref.t)/3600000); }
+    }
+
+    // Generate forecast
+    const fc = genForecast(presHpa, trend3h, windDir, windKph, tempC, humidityPct);
+    const fb = document.getElementById('forecastBar');
+    fb.textContent = fc.txt;
+    fb.className = fc.cls;
+
+  }catch(err){console.error('Data fetch error',err);} }
 
 fetchData();
-fetchExtremes();
 setInterval(fetchData,60_000);
-// refresh extremes every hour
-setInterval(fetchExtremes,60*60*1000);
 </script>
 </body>
 </html>
