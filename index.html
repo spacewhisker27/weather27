@@ -1,142 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weather Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.9.6/build/player/lottie.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Weather Dashboard</title>
   <style>
+    :root {
+      --bg-body: #f2f4f8;
+      --bg-card: #ffffff;
+      --clr-text-light: #6b7280;
+      --clr-text-dark: #111827;
+      --radius: 1rem;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: 'Roboto', sans-serif;
       margin: 0;
-      background: #f0f0f0;
+      padding: 2rem 1rem 4rem;
+      font-family: "Segoe UI", sans-serif;
+      background: var(--bg-body);
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      padding: 20px;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
 
-    .widget {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      width: 280px;
-      padding: 20px;
+    h1 {
+      margin: 0 auto 2rem;
+      font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+      font-weight: 600;
+      color: var(--clr-text-dark);
       text-align: center;
-      transition: transform 0.3s ease;
     }
 
-    .widget:hover {
-      transform: translateY(-5px);
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 1200px;
     }
 
-    .icon-container {
-      height: 150px;
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s ease;
     }
 
-    .main-value {
-      font-size: 32px;
-      font-weight: bold;
+    .card:hover { transform: translateY(-4px); }
+
+    .label {
+      font-size: 0.85rem;
+      color: var(--clr-text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.15rem;
+      text-align: center;
     }
 
-    .secondary-value {
-      color: #777;
-      margin-top: 5px;
+    .value {
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--clr-text-dark);
+      text-align: center;
     }
 
-    .wind-arrow {
-      width: 50px;
-      height: 50px;
-      margin: 0 auto;
-      transition: transform 0.5s ease;
+    .unit { font-size: 0.85rem; color: var(--clr-text-light); margin-top: 0.15rem; text-align: center; }
+
+    .subtext {
+      font-size: 0.8rem;
+      color: var(--clr-text-light);
+      margin-top: 0.1rem;
+      text-align: center;
     }
 
-    .wind-arrow svg {
-      transform-origin: center;
+    /* Glow highlight for extreme conditions */
+    @keyframes glow {
+      from { box-shadow: 0 0 8px rgba(255, 196, 0, 0.6); }
+      to   { box-shadow: 0 0 16px rgba(255, 196, 0, 1); }
     }
 
-    .low { fill: #6dd47e; }
-    .moderate { fill: #ffcc00; }
-    .high { fill: #ff7f50; }
-    .extreme { fill: #e63946; }
+    .highlight { animation: glow 1.6s infinite alternate; }
+
+    footer { margin-top: 2.5rem; font-size: 0.9rem; color: var(--clr-text-light); text-align: center; }
   </style>
 </head>
 <body>
-  <div class="widget">
-    <div class="title">Temperature</div>
-    <div class="icon-container" id="temp-icon"></div>
-    <div class="main-value">30.5°C</div>
-    <div class="secondary-value">Feels like 32.1°C</div>
-  </div>
+  <h1>Live Weather Dashboard</h1>
 
-  <div class="widget">
-    <div class="title">Humidity</div>
-    <div class="icon-container" id="humidity-icon"></div>
-    <div class="main-value">74%</div>
-    <div class="secondary-value">Humid</div>
-  </div>
+  <main class="dashboard">
+    <!-- Temperature -->
+    <div class="card" id="temperatureCard">
+      <span class="label">Temperature</span>
+      <span class="value" id="temperature">--</span>
+      <span class="unit">°C</span>
+      <span class="subtext" id="tempExtremes">H --°C (--) / L --°C (--)</span>
+    </div>
 
-  <div class="widget">
-    <div class="title">Wind</div>
-    <div class="wind-arrow" id="wind-arrow"></div>
-    <div class="main-value">8.6 kph</div>
-    <div class="secondary-value">Gusts 16.2 kph<br>245° WSW</div>
-  </div>
+    <!-- Dew Point -->
+    <div class="card" id="dewPointCard">
+      <span class="label">Dew Point</span>
+      <span class="value" id="dewPoint">--</span>
+      <span class="unit">°C</span>
+    </div>
 
-  <div class="widget">
-    <div class="title">Precipitation</div>
-    <div class="icon-container" id="rain-icon"></div>
-    <div class="main-value">0 mm</div>
-    <div class="secondary-value">0 mm/hr</div>
-  </div>
+    <!-- Humidity -->
+    <div class="card" id="humidityCard">
+      <span class="label">Humidity</span>
+      <span class="value" id="humidity">--</span>
+      <span class="unit">%</span>
+      <span class="subtext" id="humExtremes">H --% (--) / L --% (--)</span>
+    </div>
 
-  <div class="widget">
-    <div class="title">UV Index</div>
-    <div class="icon-container" id="uv-icon"></div>
-    <div class="main-value">2</div>
-    <div class="secondary-value">Low</div>
-  </div>
+    <!-- Wind -->
+    <div class="card" id="windCard">
+      <span class="label">Wind</span>
+      <span class="value" id="wind">--</span>
+      <span class="unit">km/h</span>
+      <span class="subtext" id="windDir">--</span>
+      <span class="subtext" id="windGust">Gust -- km/h</span>
+    </div>
 
-  <div class="widget">
-    <div class="title">Radiation</div>
-    <div class="icon-container" id="radiation-icon"></div>
-    <div class="main-value">258.1</div>
-    <div class="secondary-value">W/m²</div>
-  </div>
+    <!-- Precipitation -->
+    <div class="card" id="rainCard">
+      <span class="label">Precipitation</span>
+      <span class="value" id="rain">--</span>
+      <span class="unit">mm/hr</span>
+      <span class="subtext" id="rainDaily">Daily -- mm</span>
+      <span class="subtext" id="rainMonthly">Monthly -- mm</span>
+    </div>
+
+    <!-- Pressure -->
+    <div class="card" id="pressureCard">
+      <span class="label">Pressure</span>
+      <span class="value" id="pressure">--</span>
+      <span class="unit">hPa</span>
+    </div>
+
+    <!-- UV Index -->
+    <div class="card" id="uvCard">
+      <span class="label">UV Index</span>
+      <span class="value" id="uv">--</span>
+      <span class="unit">index</span>
+    </div>
+
+    <!-- Solar Radiation -->
+    <div class="card" id="radiationCard">
+      <span class="label">Radiation</span>
+      <span class="value" id="radiation">--</span>
+      <span class="unit">W/m²</span>
+    </div>
+  </main>
+
+  <footer id="updatedAt">Updated: --</footer>
 
   <script>
-    const lottieIcons = {
-      'temp-icon': 'https://assets10.lottiefiles.com/packages/lf20_zskcb1is.json',
-      'humidity-icon': 'https://assets2.lottiefiles.com/packages/lf20_5KjvW6.json',
-      'rain-icon': 'https://assets2.lottiefiles.com/packages/lf20_XYoKxz.json',
-      'uv-icon': 'https://assets4.lottiefiles.com/packages/lf20_dgjK9A.json',
-      'radiation-icon': 'https://assets5.lottiefiles.com/packages/lf20_d6bnhydq.json'
+    // --- Utility functions ---
+    const f2c = f => ((parseFloat(f) - 32) * 5 / 9).toFixed(1);
+    const inHg2hPa = x => (parseFloat(x) * 33.8639).toFixed(2);
+    const mph2kph = m => (parseFloat(m) * 1.60934).toFixed(1);
+    const ins2mm = i => (parseFloat(i) * 25.4).toFixed(1);
+    const deg2compass = deg => {
+      const d = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      return d[Math.round(deg / 22.5) % 16];
+    };
+    const ts2str = ts => {
+      const date = new Date(ts * 1000);
+      const opt = { hour:'numeric', minute:'2-digit', hour12:true };
+      return date.toLocaleTimeString('en-US', opt);
+    };
+    const dt2str = ts => {
+      const date = new Date(ts * 1000);
+      const opt = { year:'numeric', month:'long', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true };
+      return date.toLocaleString('en-US', opt);
     };
 
-    Object.entries(lottieIcons).forEach(([id, path]) => {
-      lottie.loadAnimation({
-        container: document.getElementById(id),
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        path
-      });
-    });
+    // Helper to safely access nested props
+    const get = (obj, path) => path.split('.').reduce((o,k)=>o?.[k], obj);
 
-    const windSpeed = 8.6; // dynamic value
-    const direction = 245; // dynamic value
-    const arrowColor = windSpeed > 30 ? 'extreme' : windSpeed > 20 ? 'high' : windSpeed > 10 ? 'moderate' : 'low';
+    // --- Fetch Loop ---
+    async function fetchData() {
+      try {
+        const res = await fetch('https://weatherstation.bryanespano7.workers.dev/');
+        if (!res.ok) throw new Error('Network response was not ok');
+        const { data:d } = await res.json();
 
-    const arrowSvg = `
-      <svg viewBox="0 0 100 100">
-        <polygon points="50,10 65,50 50,40 35,50" class="${arrowColor}" />
-      </svg>`;
+        // Temperature
+        document.getElementById('temperature').textContent = f2c(d.outdoor.temperature.value);
+        // Extremes (fallback to -- if missing)
+        const tMax = get(d,'outdoor.temperature.daily_max.value');
+        const tMaxT = get(d,'outdoor.temperature.daily_max.time');
+        const tMin = get(d,'outdoor.temperature.daily_min.value');
+        const tMinT = get(d,'outdoor.temperature.daily_min.time');
+        document.getElementById('tempExtremes').textContent =
+          `H ${tMax ? f2c(tMax)+'°C ('+ts2str(tMaxT)+')' : '--'} / L ${tMin ? f2c(tMin)+'°C ('+ts2str(tMinT)+')' : '--'}`;
 
-    const arrow = document.getElementById('wind-arrow');
-    arrow.innerHTML = arrowSvg;
-    arrow.firstElementChild.style.transform = `rotate(${direction}deg)`;
+        // Dew Point
+        document.getElementById('dewPoint').textContent = f2c(d.outdoor.dew_point.value);
+
+        // Humidity
+        document.getElementById('humidity').textContent = d.outdoor.humidity.value;
+        const hMax = get(d,'outdoor.humidity.daily_max.value');
+        const hMaxT = get(d,'outdoor.humidity.daily_max.time');
+        const hMin = get(d,'outdoor.humidity.daily_min.value');
+        const hMinT = get(d,'outdoor.humidity.daily_min.time');
+        document.getElementById('humExtremes').textContent =
+          `H ${hMax ?? '--'}% (${hMaxT ? ts2str(hMaxT) : '--'}) / L ${hMin ?? '--'}% (${hMinT ? ts2str(hMinT) : '--'})`;
+
+        // Wind
+        document.getElementById('wind').textContent = mph2kph(d.wind.wind_speed.value);
+        document.getElementById('windDir').textContent = deg2compass(parseFloat(d.wind.wind_direction.value));
+        document.getElementById('windGust').textContent = `Gust ${mph2kph(d.wind.wind_gust.value)} km/h`;
+
+        // Precipitation
+        document.getElementById('rain').textContent = ins2mm(d.rainfall.rain_rate.value);
+        const rainDay = get(d,'rainfall.daily.value');
+        const rainMon = get(d,'rainfall.monthly.value');
+        document.getElementById('rainDaily').textContent = `Daily ${rainDay ? ins2mm(rainDay) : '--'} mm`;
+        document.getElementById('rainMonthly').textContent = `Monthly ${rainMon ? ins2mm(rainMon) : '--'} mm`;
+
+        // Pressure / UV / Radiation
+        document.getElementById('pressure').textContent = inHg2hPa(d.pressure.relative.value);
+        document.getElementById('uv').textContent = d.solar_and_uvi.uvi.value;
+        document.getElementById('radiation').textContent = d.solar_and_uvi.solar.value;
+
+        // Updated stamp
+        document.getElementById('updatedAt').textContent = `Updated: ${dt2str(d.outdoor.temperature.time)}`;
+
+        // Highlights
+        const uvCard = document.getElementById('uvCard');
+        const rainCard = document.getElementById('rainCard');
+        parseFloat(d.solar_and_uvi.uvi.value) >= 8 ? uvCard.classList.add('highlight') : uvCard.classList.remove('highlight');
+        parseFloat(d.rainfall.rain_rate.value)*25.4 >= 15 ? rainCard.classList.add('highlight') : rainCard.classList.remove('highlight');
+
+      } catch (err) {
+        console.error('Failed to fetch or parse data:', err);
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 60_000);
   </script>
 </body>
 </html>
