@@ -6,163 +6,232 @@
   <title>Live Weather Dashboard</title>
   <style>
     :root {
-      --bg-body:#f2f4f8;
-      --bg-card:#ffffff;
-      --clr-text-light:#6b7280;
-      --clr-text-dark:#111827;
-      --radius:1rem;
-      --shadow:0 4px 12px rgba(0,0,0,0.08);
-      --accent-good:#22c55e;
-      --accent-bad:#ef4444;
+      --bg-body: #f2f4f8;
+      --bg-card: #ffffff;
+      --clr-text-light: #6b7280;
+      --clr-text-dark: #111827;
+      --radius: 1rem;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --accent-good: #22c55e;
+      --accent-bad: #ef4444;
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:"Segoe UI",sans-serif;background:var(--bg-body);display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;min-height:100vh;}
-    h1{font-size:clamp(1.5rem,2vw+1rem,2.25rem);font-weight:600;color:var(--clr-text-dark);margin-bottom:1.5rem;text-align:center;}
-
-    #forecastBar{width:100%;max-width:1200px;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem 1.5rem;margin-bottom:1.5rem;font-size:1.15rem;font-weight:600;text-align:center;color:var(--clr-text-dark);transition:color .3s ease;}
-    #forecastBar.good{color:var(--accent-good);}#forecastBar.bad{color:var(--accent-bad);}#forecastBar.neutral{color:var(--clr-text-dark);}
-
-    .dashboard{width:100%;max-width:1200px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;}
-    .card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem 1rem;display:flex;flex-direction:column;align-items:center;transition:transform .2s ease;}
-    .card:hover{transform:translateY(-4px);}
-    .label{font-size:.85rem;color:var(--clr-text-light);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.15rem;text-align:center;}
-    .value{font-size:2.25rem;font-weight:700;color:var(--clr-text-dark);text-align:center;}
-    .unit{font-size:.85rem;color:var(--clr-text-light);margin-top:.15rem;text-align:center;}
-    .subtext{font-size:.8rem;color:var(--clr-text-light);margin-top:.1rem;text-align:center;}
-    @keyframes glow{from{box-shadow:0 0 8px rgba(255,196,0,.6);}to{box-shadow:0 0 16px rgba(255,196,0,1);}}
-    .highlight{animation:glow 1.6s infinite alternate;}
-    footer{margin-top:2.5rem;font-size:.9rem;color:var(--clr-text-light);text-align:center;}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: var(--bg-body);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+      min-height: 100vh;
+    }
+    h1 { font-size: clamp(1.5rem,2vw+1rem,2.25rem); font-weight:600; color:var(--clr-text-dark); margin-bottom:1.5rem; text-align:center; }
+    #forecastBar {
+      width:100%; max-width:1200px; background:var(--bg-card); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:1rem 1.5rem; margin-bottom:1.5rem;
+      font-size:1.15rem; font-weight:600; text-align:center; color:var(--clr-text-dark);
+      transition:color .3s ease;
+    }
+    #forecastBar.good { color: var(--accent-good); }
+    #forecastBar.bad { color: var(--accent-bad); }
+    #forecastBar.neutral { color: var(--clr-text-dark); }
+    .dashboard { width:100%; max-width:1200px; display:grid;
+                 grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.25rem; }
+    .card { background:var(--bg-card); border-radius:var(--radius);
+            box-shadow:var(--shadow); padding:1.25rem 1rem;
+            display:flex; flex-direction:column; align-items:center; transition:transform .2s ease; }
+    .card:hover { transform: translateY(-4px); }
+    .label { font-size:.85rem; color:var(--clr-text-light);
+             text-transform:uppercase; letter-spacing:.03em;
+             margin-bottom:.15rem; text-align:center; }
+    .value { font-size:2.25rem; font-weight:700; color:var(--clr-text-dark);
+             text-align:center; }
+    .unit { font-size:.85rem; color:var(--clr-text-light);
+            margin-top:.15rem; text-align:center; }
+    .subtext { font-size:.8rem; color:var(--clr-text-light);
+               margin-top:.1rem; text-align:center; }
+    footer { margin-top:2.5rem; font-size:.9rem; color:var(--clr-text-light);
+             text-align:center; }
   </style>
 </head>
 <body>
   <h1>Live Weather Dashboard</h1>
-  <div id="forecastBar" class="neutral">Calculating forecast…</div>
+  <div id="forecastBar" class="neutral">Loading forecast…</div>
   <main class="dashboard">
-    <div class="card" id="temperatureCard"><span class="label">Temperature</span><span class="value" id="temperature">--</span><span class="unit">°C</span><span class="subtext" id="tempExtremes">H --°C (--) / L --°C (--)</span></div>
-    <div class="card" id="dewPointCard"><span class="label">Dew Point</span><span class="value" id="dewPoint">--</span><span class="unit">°C</span></div>
-    <div class="card" id="humidityCard"><span class="label">Humidity</span><span class="value" id="humidity">--</span><span class="unit">%</span><span class="subtext" id="humExtremes">H --% (--) / L --% (--)</span></div>
-    <div class="card" id="windCard"><span class="label">Wind</span><span class="value" id="wind">--</span><span class="unit">km/h</span><span class="subtext" id="windDir">--</span><span class="subtext" id="windGust">Gust -- km/h</span></div>
-    <div class="card" id="rainCard"><span class="label">Precipitation</span><span class="value" id="rain">--</span><span class="unit">mm/hr</span><span class="subtext" id="rainDaily">Daily -- mm</span><span class="subtext" id="rainMonthly">Monthly -- mm</span></div>
-    <div class="card" id="pressureCard"><span class="label">Pressure</span><span class="value" id="pressure">--</span><span class="unit">hPa</span></div>
-    <div class="card" id="uvCard"><span class="label">UV Index</span><span class="value" id="uv">--</span><span class="unit">index</span></div>
-    <div class="card" id="radiationCard"><span class="label">Radiation</span><span class="value" id="radiation">--</span><span class="unit">W/m²</span></div>
+    <div class="card">
+      <span class="label">Temperature</span>
+      <span class="value" id="temperature">--</span>
+      <span class="unit">°C</span>
+      <span class="subtext" id="tempExtremes">H --°C / L --°C</span>
+    </div>
+    <div class="card">
+      <span class="label">Humidity</span>
+      <span class="value" id="humidity">--</span>
+      <span class="unit">%</span>
+      <span class="subtext" id="humExtremes">H --% / L --%</span>
+    </div>
+    <div class="card">
+      <span class="label">Wind</span>
+      <span class="value" id="wind">--</span>
+      <span class="unit">km/h</span>
+      <span class="subtext" id="windDir">--</span>
+      <span class="subtext" id="windGust">Gust --</span>
+    </div>
+    <div class="card">
+      <span class="label">Rain</span>
+      <span class="value" id="rainRate">--</span>
+      <span class="unit">mm/hr</span>
+      <span class="subtext" id="rainHourDesc">--</span>
+      <span class="subtext" id="rainDaily">Daily -- mm</span>
+      <span class="subtext" id="rainMonthly">Monthly -- mm</span>
+    </div>
+    <div class="card">
+      <span class="label">Pressure</span>
+      <span class="value" id="pressure">--</span>
+      <span class="unit">hPa</span>
+    </div>
+    <div class="card">
+      <span class="label">UV Index</span>
+      <span class="value" id="uv">--</span>
+      <span class="unit">index</span>
+    </div>
+    <div class="card">
+      <span class="label">Radiation</span>
+      <span class="value" id="radiation">--</span>
+      <span class="unit">W/m²</span>
+    </div>
   </main>
   <footer id="updatedAt">Updated: --</footer>
 
-<script>
-/***** Helper functions *****/
-const f2c = f=>((parseFloat(f)-32)*5/9).toFixed(1);
-const inHg2hPa = x=>(parseFloat(x)*33.8639).toFixed(2);
-const mph2kph = m=>(parseFloat(m)*1.60934).toFixed(1);
-const ins2mm = i=>(parseFloat(i)*25.4).toFixed(1);
-const deg2comp = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16];
-const tsDate = t=> t? new Date(t*1000).toLocaleString('en-PH',{year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true}) : '--';
-
-function getSeason(month){
-  if(month>=5 && month<=8) return 'wet';
-  if(month===4 || month===9) return 'transition';
-  if(month>=3 && month<=4) return 'hot';
-  return 'dry';
-}
-
-function genForecast(pNow, trend3h, windDir, windKph, tempC, humidity){
-  const month = new Date().getMonth();
-  const season = getSeason(month);
-
-  /* dynamic thresholds */
-  const TH_STEADY = season==='dry'? 0.5 : 0.7;
-  const RAPID_FALL = season==='dry'? -1.2 : -0.9;
-  const SLOW_FALL  = season==='dry'? -0.7 : -0.5;
-  const HUMID_HIGH = 85;
-  const TEMP_HOT   = 31;
-  const WIND_MONSOON = 15; // kph
-
-  const wetDirs = ['SW','WSW','W'];
-
-  const h = new Date().getHours();
-  const partOfDay = h<12? 'later this afternoon': h<18? 'this evening':'overnight';
-
-  /* Severe / heavy rain check */
-  if((trend3h<=RAPID_FALL && pNow<1008) || (windKph>=WIND_MONSOON && wetDirs.includes(windDir) && pNow<1010)){
-    return {txt:'Heavy rain or thunderstorms likely in the next 2–3 hours.',cls:'bad'};
-  }
-
-  /* Likely showers with high humidity & heat */
-  if(humidity>=HUMID_HIGH && tempC>=TEMP_HOT){
-    if(trend3h<=SLOW_FALL || wetDirs.includes(windDir) || season!=='dry'){
-      return {txt:`Rain showers likely ${season==='wet'? 'in the next 3–6 hours' : partOfDay}.`,cls:'bad'};
+  <script>
+    // Helper Converters & Formatters
+    function tempColor(c) {
+      if (c <= 18) return 'blue';
+      if (c >= 35) return 'red';
+      const pct = (c - 18) / (35 - 18);
+      const r = Math.round(pct * 255), g = Math.round(pct * 165), b = Math.round(255 - pct * 255);
+      return `rgb(${r},${g},${b})`;
     }
-  }
+    const f2c = f => ((parseFloat(f) - 32) * 5/9).toFixed(1);
+    const inHg2hPa = x => (parseFloat(x) * 33.8639).toFixed(2);
+    const mph2kph = m => (parseFloat(m) * 1.60934).toFixed(1);
+    const ins2mm = i => (parseFloat(i) * 25.4).toFixed(1);
+    const deg2comp = d => ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16];
+    const tsDate = t => new Date(t*1000).toLocaleString('en-PH',{ year:'numeric', month:'long', day:'numeric'});
+    const tsTime = t => new Date(t*1000).toLocaleTimeString('en-PH',{ hour:'numeric', minute:'2-digit', hour12:true });
 
-  /* Isolated showers trigger */
-  if(season!=='dry' && trend3h<-TH_STEADY){
-    return {txt:`Isolated rain showers possible ${partOfDay}.`,cls:'bad'};
-  }
-
-  /* Clearing criteria */
-  if(trend3h>TH_STEADY && humidity<80){
-    return {txt:'Skies clearing, weather improving within the next few hours.',cls:'good'};
-  }
-
-  /* Fair when high pressure, low humidity */
-  if(pNow>1013 && humidity<70){
-    return {txt:'Fair and mostly sunny. No rain expected in the next 3–6 hours.',cls:'good'};
-  }
-
-  return {txt:'Partly cloudy with only a slight chance of showers.',cls:'neutral'};
-}
-
-/***** Fetch loop *****/
-async function fetchData(){
-  try{
-    const res = await fetch('https://weatherstation.bryanespano7.workers.dev/');
-    const {data:d} = await res.json();
-
-    const tempC = parseFloat(f2c(d.outdoor.temperature.value));
-    const humidityPct = parseFloat(d.outdoor.humidity.value);
-    const windDirDeg = parseFloat(d.wind.wind_direction.value);
-    const windDir = deg2comp(windDirDeg);
-    const windKph = parseFloat(mph2kph(d.wind.wind_speed.value));
-
-    // Update UI values
-    document.getElementById('temperature').textContent = tempC.toFixed(1);
-    document.getElementById('dewPoint').textContent    = f2c(d.outdoor.dew_point.value);
-    document.getElementById('humidity').textContent    = humidityPct;
-    document.getElementById('wind').textContent        = windKph.toFixed(1);
-    document.getElementById('windDir').textContent     = windDir;
-    document.getElementById('windGust').textContent    = `Gust ${mph2kph(d.wind.wind_gust.value)} km/h`;
-    document.getElementById('rain').textContent        = ins2mm(d.rainfall.rain_rate.value);
-    document.getElementById('rainDaily').textContent   = `Daily ${ins2mm(d.rainfall.daily.value||0)} mm`;
-    document.getElementById('rainMonthly').textContent = `Monthly ${ins2mm(d.rainfall.monthly.value||0)} mm`;
-
-    const presHpa = parseFloat(inHg2hPa(d.pressure.relative.value));
-    document.getElementById('pressure').textContent    = presHpa.toFixed(2);
-    document.getElementById('uv').textContent          = d.solar_and_uvi.uvi.value;
-    document.getElementById('radiation').textContent   = d.solar_and_uvi.solar.value;
-    document.getElementById('updatedAt').textContent   = `Updated: ${tsDate(d.outdoor.temperature.time)}`;
-
-    // Compute 3‑hour pressure trend
-    const now = Date.now();
-    const hist = JSON.parse(localStorage.getItem('pressureHist')||'[]');
-    hist.push({t:now,p:presHpa});
-    while(hist.length && (now - hist[0].t) > 4*3600*1000) hist.shift();
-    localStorage.setItem('pressureHist',JSON.stringify(hist));
-    let trend3h = 0;
-    if(hist.length>=2){
-      const ref = hist.find(h=> (now-h.t) > 2.5*3600*1000);
-      if(ref){ trend3h = (presHpa - ref.p)/((now-ref.t)/3600000); }
+    function rainCategory(rate) {
+      if (rate <= 0) return 'No rain';
+      if (rate < 2.5) return 'Light rain';
+      if (rate < 7.5) return 'Light to moderate rain';
+      if (rate < 15) return 'Moderate to heavy rain';
+      if (rate < 30) return 'Heavy to intense rain';
+      return 'Torrential rain';
     }
 
-    // Generate forecast
-    const fc = genForecast(presHpa, trend3h, windDir, windKph, tempC, humidityPct);
-    const fb = document.getElementById('forecastBar');
-    fb.textContent = fc.txt;
-    fb.className = fc.cls;
+    // Forecast rules stub
+    function genForecast() {
+      return { txt:'Partly cloudy with only a slight chance of showers.', cls:'neutral' };
+    }
 
-  }catch(err){console.error('Data fetch error',err);} }
+    async function fetchData() {
+      const bar = document.getElementById('forecastBar');
+      try {
+        const res = await fetch('https://weatherstation.bryanespano7.workers.dev/');
+        const { data: d } = await res.json();
 
-fetchData();
-setInterval(fetchData,60_000);
-</script>
+        // Timestamp
+        const now = Date.now();
+        const ts = d.outdoor.temperature.time;
+
+        // Rain history (last 6h)
+        let rainHist = JSON.parse(localStorage.getItem('rainHist')||'[]');
+        const rate = parseFloat(ins2mm(d.rainfall.rain_rate.value));
+        rainHist.push({ t:now, r:rate });
+        rainHist = rainHist.filter(e => now - e.t <= 6*3600*1000);
+        localStorage.setItem('rainHist', JSON.stringify(rainHist));
+
+        // Compute 1h accumulation (approx avg rate)
+        const lastHour = rainHist.filter(e => now - e.t <= 3600*1000);
+        const avgRate = lastHour.reduce((s,e)=>s+e.r,0)/(lastHour.length||1);
+        const accum1h = avgRate;
+
+        // Forecast logic
+        let forecastText, fcCls;
+        if (accum1h > 0) {
+          const recent = rainHist.filter(e=> now - e.t <= 15*60*1000);
+          const trend = recent.length>=2? recent[recent.length-1].r - recent[0].r : 0;
+          if (trend >= 0) forecastText = `Showers continuing, ${accum1h.toFixed(1)} mm in last hour.`;
+          else forecastText = `Showers easing, ${accum1h.toFixed(1)} mm in last hour.`;
+          fcCls = 'bad';
+        } else {
+          const fc = genForecast();
+          forecastText = fc.txt;
+          fcCls = fc.cls;
+        }
+        bar.textContent = forecastText;
+        bar.className = fcCls;
+
+        // Update Cards
+        const tempC = parseFloat(f2c(d.outdoor.temperature.value));
+        const humPct = parseFloat(d.outdoor.humidity.value);
+        const windSpd= parseFloat(mph2kph(d.wind.wind_speed.value));
+        const windDir= deg2comp(parseFloat(d.wind.wind_direction.value));
+        const windG = parseFloat(mph2kph(d.wind.wind_gust.value));
+        const daily = parseFloat(ins2mm(d.rainfall.daily.value||0));
+        const monthly= parseFloat(ins2mm(d.rainfall.monthly.value||0));
+        const presHpa= parseFloat(inHg2hPa(d.pressure.relative.value));
+        const uvIdx  = d.solar_and_uvi.uvi.value;
+        const rad    = d.solar_and_uvi.solar.value;
+
+        // Extremes tracking
+        let ex = JSON.parse(localStorage.getItem('extremes')||'{}');
+        const today = new Date(now).toISOString().slice(0,10);
+        if (ex.date !== today) {
+          ex = { date:today, maxTemp:tempC, maxTempTime:ts, minTemp:tempC, minTempTime:ts,
+                 maxHum:humPct, maxHumTime:ts, minHum:humPct, minHumTime:ts };
+        } else {
+          if (tempC>ex.maxTemp) { ex.maxTemp=tempC; ex.maxTempTime=ts; }
+          if (tempC<ex.minTemp) { ex.minTemp=tempC; ex.minTempTime=ts; }
+          if (humPct>ex.maxHum) { ex.maxHum=humPct; ex.maxHumTime=ts; }
+          if (humPct<ex.minHum) { ex.minHum=humPct; ex.minHumTime=ts; }
+        }
+        localStorage.setItem('extremes', JSON.stringify(ex));
+
+        // Apply UI
+        const tempEl = document.getElementById('temperature');
+        tempEl.textContent = tempC.toFixed(1);
+        tempEl.style.color = tempColor(tempC);
+        document.getElementById('tempExtremes').textContent =
+          `H ${ex.maxTemp.toFixed(1)}°C (${tsDate(ex.maxTempTime)} ${tsTime(ex.maxTempTime)}) / L ${ex.minTemp.toFixed(1)}°C (${tsDate(ex.minTempTime)} ${tsTime(ex.minTempTime)})`;
+
+        document.getElementById('humidity').textContent = humPct.toFixed(0);
+        document.getElementById('humExtremes').textContent =
+          `H ${ex.maxHum}% (${tsDate(ex.maxHumTime)} ${tsTime(ex.maxHumTime)}) / L ${ex.minHum}% (${tsDate(ex.minHumTime)} ${tsTime(ex.minHumTime)})`;
+
+        document.getElementById('wind').textContent = windSpd.toFixed(1);
+        document.getElementById('windDir').textContent = windDir;
+        document.getElementById('windGust').textContent = `Gust ${windG.toFixed(1)} km/h`;
+
+        document.getElementById('rainRate').textContent = rate.toFixed(1);
+        document.getElementById('rainHourDesc').textContent = rainCategory(rate);
+        document.getElementById('rainDaily').textContent = `Daily ${daily.toFixed(1)} mm`;
+        document.getElementById('rainMonthly').textContent = `Monthly ${monthly.toFixed(1)} mm`;
+
+        document.getElementById('pressure').textContent = presHpa.toFixed(2);
+        document.getElementById('uv').textContent = uvIdx;
+        document.getElementById('radiation').textContent = rad;
+        document.getElementById('updatedAt').textContent = `Updated: ${tsDate(ts)} ${tsTime(ts)}`;
+
+      } catch (err) {
+        console.error('Fetch error', err);
+        bar.textContent = 'Data unavailable';
+        bar.className = 'bad';
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 60000);
+  </script>
 </body>
 </html>
