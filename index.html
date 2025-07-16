@@ -32,19 +32,17 @@
       margin-bottom: 1.5rem;
       text-align: center;
     }
+    /* Forecast bar */
     #forecastBar {
       position: relative;
-      width: 100%;
-      max-width: 1200px;
+      width: 100%; max-width: 1200px;
       background: var(--bg-card);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 1rem 1.5rem;
       margin-bottom: 1.5rem;
-      font-size: 1.15rem;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
+      font-size: 1.15rem; font-weight: 600;
+      white-space: nowrap; overflow: hidden;
       transition: color 0.3s;
     }
     #forecastBar.good    { color: var(--accent-good); }
@@ -59,30 +57,36 @@
       0%   { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
+    /* Dashboard layout */
     .dashboard {
-      width: 100%;
-      max-width: 1200px;
+      width: 100%; max-width: 1200px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
       gap: 1.25rem;
     }
+    /* Card base */
     .card {
       background: var(--bg-card);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 1.25rem 1rem;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       align-items: center;
-      transition: transform 0.2s ease;
+      transition: transform .2s ease, box-shadow .3s ease;
+      position: relative;
     }
     .card:hover { transform: translateY(-4px); }
-    .label { font-size: 0.85rem; color: var(--clr-text-light); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.15rem; text-align: center; }
+    /* Warning glow */
+    .warning {
+      box-shadow: 0 0 12px 4px rgba(255,0,0,0.7) !important;
+    }
+    .label { font-size: .85rem; color: var(--clr-text-light); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .15rem; text-align: center; }
     .value { font-size: 3rem; font-weight: 700; color: var(--clr-text-dark); text-align: center; }
-    .unit  { font-size: 0.85rem; color: var(--clr-text-light); margin-top: 0.15rem; text-align: center; }
-    .subtext { font-size: 0.8rem; color: var(--clr-text-light); margin-top: 0.1rem; text-align: center; }
-    footer { margin-top: 2.5rem; font-size: 0.9rem; color: var(--clr-text-light); text-align: center; }
-    .raindrop { position: absolute; top: -10px; width: 4px; height: 10px; background: rgba(0, 150, 255, 0.7); border-radius: 50%; animation: fall linear; }
+    .unit  { font-size: .85rem; color: var(--clr-text-light); margin-top: .15rem; text-align: center; }
+    .subtext { font-size: .8rem; color: var(--clr-text-light); margin-top: .1rem; text-align: center; }
+    footer { margin-top: 2.5rem; font-size: .9rem; color: var(--clr-text-light); text-align: center; }
+    /* Raindrop */
+    .raindrop { position: absolute; top: -10px; width: 4px; height: 10px; background: rgba(0,150,255,0.7); border-radius: 50%; animation: fall linear; }
     @keyframes fall { to { transform: translateY(110%); opacity: 0; } }
   </style>
 </head>
@@ -90,30 +94,35 @@
   <h1>Live Weather Dashboard</h1>
   <div id="forecastBar" class="neutral"><span id="forecastText">Loading forecast…</span></div>
   <main class="dashboard">
-    <div class="card">
+    <!-- Temperature -->
+    <div class="card" id="tempCard">
       <span class="label">Temperature</span>
       <span class="value" id="temperature">--</span>
       <span class="unit">°C</span>
     </div>
-    <div class="card">
+    <!-- Humidity -->
+    <div class="card" id="humidityCard">
       <span class="label">Humidity</span>
       <span class="value" id="humidity">--</span>
       <span class="unit">%</span>
       <span class="subtext" id="humDesc">--</span>
     </div>
-    <div class="card">
+    <!-- Heat Index -->
+    <div class="card" id="heatCard">
       <span class="label">Heat Index</span>
       <span class="value" id="heatIndex">--</span>
       <span class="unit">°C</span>
       <span class="subtext" id="heatDesc">--</span>
     </div>
-    <div class="card">
+    <!-- Wind -->
+    <div class="card" id="windCard">
       <span class="label">Wind</span>
       <span class="value" id="wind">--</span>
       <span class="unit">km/h</span>
       <span class="subtext" id="windDir">--</span>
       <span class="subtext" id="windGust">Gust --</span>
     </div>
+    <!-- Rain -->
     <div class="card" id="rainCard">
       <span class="label">Rain</span>
       <span class="value" id="rainRate">--</span>
@@ -122,17 +131,20 @@
       <span class="subtext" id="rainDaily">Daily -- mm</span>
       <span class="subtext" id="rainMonthly">Monthly -- mm</span>
     </div>
-    <div class="card">
+    <!-- Pressure -->
+    <div class="card" id="pressureCard">
       <span class="label">Pressure</span>
       <span class="value" id="pressure">--</span>
       <span class="unit">hPa</span>
     </div>
-    <div class="card">
+    <!-- UV Index -->
+    <div class="card" id="uvCard">
       <span class="label">UV Index</span>
       <span class="value" id="uv">--</span>
-      <span class="unit">index</span>
+      <span class="unit" id="uvDesc">--</span>
     </div>
-    <div class="card">
+    <!-- Radiation -->
+    <div class="card" id="radCard">
       <span class="label">Radiation</span>
       <span class="value" id="radiation">--</span>
       <span class="unit">W/m²</span>
@@ -141,141 +153,223 @@
   <footer id="updatedAt">Updated: --</footer>
 
   <script>
+    // Helpers
     function tempColor(c) {
       if (c <= 18) return 'blue';
       if (c >= 35) return 'red';
-      const pct = (c - 18) / (35 - 18);
-      const r = Math.round(pct * 255), g = Math.round(pct * 165), b = Math.round(255 - pct * 255);
+      const pct = (c - 18) / 17;
+      const r = Math.round(pct * 255),
+            g = Math.round(pct * 165),
+            b = Math.round(255 - pct * 255);
       return `rgb(${r},${g},${b})`;
     }
     const f2c      = f => ((parseFloat(f) - 32) * 5/9).toFixed(1);
     const inHg2hPa = x => (parseFloat(x) * 33.8639).toFixed(2);
     const mph2kph  = m => (parseFloat(m) * 1.60934).toFixed(1);
     const ins2mm   = i => (parseFloat(i) * 25.4).toFixed(1);
-    const deg2comp = d => ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5) % 16];
-    const tsDate   = t => new Date(t * 1000).toLocaleString('en-PH',{ year:'numeric', month:'long', day:'numeric' });
-    const tsTime   = t => new Date(t * 1000).toLocaleTimeString('en-PH',{ hour:'numeric', minute:'2-digit', hour12:true });
+    const deg2comp = d =>
+      ['N','NNE','NE','ENE','E','ESE','SE','SSE',
+       'S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16];
+    const tsDate   = t => new Date(t*1000)
+      .toLocaleString('en-PH',{ year:'numeric', month:'long', day:'numeric' });
+    const tsTime   = t => new Date(t*1000)
+      .toLocaleTimeString('en-PH',{ hour:'numeric', minute:'2-digit', hour12:true });
 
     function rainCategory(rate) {
-      if (rate <= 0) return 'No rain';
-      if (rate < 2.5) return 'Light rain';
-      if (rate < 7.5) return 'Light–moderate';
-      if (rate < 15) return 'Mod–heavy';
-      if (rate < 30) return 'Heavy–intense';
+      if (rate <= 0)      return 'No rain';
+      if (rate < 2.5)     return 'Light rain';
+      if (rate < 7.5)     return 'Light to moderate';
+      if (rate < 15)      return 'Moderate to heavy';
+      if (rate < 30)      return 'Heavy to intense';
       return 'Torrential rain';
     }
     function createRaindrop() {
       const card = document.getElementById('rainCard');
       const drop = document.createElement('div');
       drop.classList.add('raindrop');
-      drop.style.left = Math.random() * 100 + '%';
-      drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+      drop.style.left = Math.random()*100 + '%';
+      drop.style.animationDuration = (Math.random()*0.5 + 0.5)+'s';
       card.appendChild(drop);
       drop.addEventListener('animationend', () => drop.remove());
     }
+
+    // Generate generic forecast snippets
     function genForecast() {
       const fx = [
-        { txt: 'Expect clear skies with plenty of sunshine through the next few hours.', cls: 'good' },
-        { txt: 'It will be hot and humid; remember to drink water and seek shade when you can.', cls: 'neutral' },
-        { txt: 'Clouds will roll in with a light breeze, keeping conditions fairly comfortable.', cls: 'neutral' },
-        { txt: 'Overcast skies ahead with a chance of light showers; you may want to have an umbrella on hand.', cls: 'bad' },
-        { txt: 'Afternoon thunderstorms expected; secure loose items and avoid outdoor activities if possible.', cls: 'bad' },
-        { txt: 'Passing rain showers likely; roads could be slippery—drive carefully.', cls: 'bad' },
-        { txt: 'Breezy conditions moving in after rain, bringing cooler, fresher air.', cls: 'good' },
-        { txt: 'Cloudy and muggy with intermittent drizzle; plan accordingly for wet surfaces.', cls: 'bad' }
+        { txt:'Expect clear skies and sunshine for the next few hours.', cls:'good' },
+        { txt:'Warm and humid; stay hydrated and seek shade.', cls:'neutral' },
+        { txt:'Mostly cloudy with a light breeze—comfortable.', cls:'neutral' },
+        { txt:'Overcast with a chance of light showers; keep an umbrella.', cls:'bad' },
+        { txt:'Thunderstorm likely later; secure loose items.', cls:'bad' },
+        { txt:'Passing showers possible; roads may be slippery.', cls:'bad' },
+        { txt:'Breezy conditions providing relief after rain.', cls:'good' },
+        { txt:'Cloudy and muggy with intermittent drizzle.', cls:'bad' }
       ];
-      return fx[Math.floor(Math.random() * fx.length)];
+      return fx[Math.floor(Math.random()*fx.length)];
     }
 
-    async function fetchData(liveOnly = false) {
+    async function fetchData(liveOnly=false) {
       try {
+        // Fetch live JSON
         const res = await fetch('https://weatherstation.bryanespano7.workers.dev/');
-        const { data: d } = await res.json();
-        const now = Date.now(), ts = d.outdoor.temperature.time;
-        const tempC  = parseFloat(f2c(d.outdoor.temperature.value));
-        const humPct =	parseFloat(d.outdoor.humidity.value);
-        const windSpd= parseFloat(mph2kph(d.wind.wind_speed.value));
-        const windDir= deg2comp(parseFloat(d.wind.wind_direction.value));
-        const windG  = parseFloat(mph2kph(d.wind.wind_gust.value));
-        const rate   = parseFloat(ins2mm(d.rainfall.rain_rate.value));
-        const daily  = parseFloat(ins2mm(d.rainfall.daily.value||0));
-        const monthly= parseFloat(ins2mm(d.rainfall.monthly.value||0));
-        const pres   = parseFloat(inHg2hPa(d.pressure.relative.value));
+        const { data:d } = await res.json();
+
+        const now    = Date.now();
+        const ts     = d.outdoor.temperature.time;
+        const tempC  = +f2c(d.outdoor.temperature.value);
+        const humPct = +d.outdoor.humidity.value;
+        const windSpd= +mph2kph(d.wind.wind_speed.value);
+        const windDir= deg2comp(+d.wind.wind_direction.value);
+        const windG  = +mph2kph(d.wind.wind_gust.value);
+        const rate   = +ins2mm(d.rainfall.rain_rate.value);
+        const daily  = +ins2mm(d.rainfall.daily.value||0);
+        const monthly= +ins2mm(d.rainfall.monthly.value||0);
+        const pres   = +inHg2hPa(d.pressure.relative.value);
         const uvIdx  = d.solar_and_uvi.uvi.value;
         const rad    = d.solar_and_uvi.solar.value;
 
-        const hist = key => JSON.parse(localStorage.getItem(key)||'[]');
-        let R=hist('rainHist'), P=hist('presHist'), T=hist('tempHist'), H=hist('humHist'), W=hist('windHist');
-        R.push({t:now,r:rate});P.push({t:now,p:pres});T.push({t:now,v:tempC});H.push({t:now,v:humPct});W.push({t:now,v:windSpd});
-        const trim6 = a => a.filter(e=> now-e.t <= 6*3600*1000);
-        R=trim6(R);P=trim6(P);T=trim6(T);H=trim6(H);W=trim6(W);
-        localStorage.setItem('rainHist',JSON.stringify(R));
-        localStorage.setItem('presHist',JSON.stringify(P));
-        localStorage.setItem('tempHist',JSON.stringify(T));
-        localStorage.setItem('humHist',JSON.stringify(H));
-        localStorage.setItem('windHist',JSON.stringify(W));
+        // Update histories (last 6h)
+        const hist = k => JSON.parse(localStorage.getItem(k)||'[]');
+        let R = hist('rainHist'), P = hist('presHist'),
+            T = hist('tempHist'), H = hist('humHist'),
+            W = hist('windHist');
+        R.push({t:now, r:rate});
+        P.push({t:now, p:pres});
+        T.push({t:now, v:tempC});
+        H.push({t:now, v:humPct});
+        W.push({t:now, v:windSpd});
+        const trim6 = arr => arr.filter(e => now - e.t <= 6*3600*1000);
+        [R,P,T,H,W] = [R,P,T,H,W].map(trim6);
+        ['rainHist','presHist','tempHist','humHist','windHist']
+          .forEach((k,i)=>localStorage.setItem(k, JSON.stringify([R,P,T,H,W][i])));
 
+        // Forecast logic every 15 minutes
         if (!liveOnly) {
-          const slice3 = a => a.filter(e=> now-e.t <= 3*3600*1000);
-          const rain3 = slice3(R).reduce((s,e)=> s+e.r, 0);
-          const dp    = P.length>1? P[P.length-1].p - P[0].p : 0;
-          const delta = a => a.length>1? a[a.length-1].v - a[0].v : 0;
-          const dT = delta(slice3(T)), dH = delta(slice3(H)), dW = delta(slice3(W));
+          const slice3 = arr => arr.filter(e => now - e.t <= 3*3600*1000);
+          const rain3 = slice3(R).reduce((s,e)=>s+e.r,0);
+          // pressure trend & storm check
+          const pres3 = slice3(P);
+          const recentPres = pres3.length ? pres3[pres3.length-1].p : pres;
+
           let fxData;
-          if (rain3 > 10) fxData = { txt:`Heavy rain last 3h: ${rain3.toFixed(1)} mm`, cls:'bad' };
-          else if(rain3 > 2.5) fxData = { txt:`Moderate rain last 3h: ${rain3.toFixed(1)} mm`, cls:'bad' };
-          else if(rain3 > 0) fxData = { txt:`Light rain last 3h: ${rain3.toFixed(1)} mm`, cls:'bad' };
+          // Storm indicator: absolute low pressure or high winds
+          if (recentPres <= 1000 || windSpd >= 60) {
+            fxData = {
+              txt: `Storm indicator: pressure at ${recentPres.toFixed(1)} hPa${windSpd>=60? ` & wind ${windSpd.toFixed(1)} km/h` : ''}. Be prepared!`,
+              cls: 'bad'
+            };
+          }
+          // Rain-based warnings
+          else if (rain3 > 10) fxData = { txt: `Heavy rain last 3 h: ${rain3.toFixed(1)} mm.`, cls:'bad' };
+          else if (rain3 > 2.5) fxData = { txt: `Moderate rain last 3 h: ${rain3.toFixed(1)} mm.`, cls:'bad' };
+          else if (rain3 > 0)   fxData = { txt: `Light rain last 3 h: ${rain3.toFixed(1)} mm.`, cls:'bad' };
           else {
             fxData = genForecast();
+            // extra notes on temperature/humidity/wind trends
             const notes = [];
-            if (Math.abs(dT)>1) notes.push(dT>0? 'getting warmer' : 'cooling');
-            if (Math.abs(dH)>5) notes.push(dH>0? 'more humid' : 'drier');
-            if (Math.abs(dW)>5) notes.push(dW>0? 'winds picking up' : 'calming');
-            if (notes.length) fxData.txt += `; overall ${notes.join(', ')}`;
+            const dT = slice3(T).length>1 ? slice3(T).slice(-1)[0].v - slice3(T)[0].v : 0;
+            const dH = slice3(H).length>1 ? slice3(H).slice(-1)[0].v - slice3(H)[0].v : 0;
+            const dW = slice3(W).length>1 ? slice3(W).slice(-1)[0].v - slice3(W)[0].v : 0;
+            if (Math.abs(dT)>1) notes.push(dT>0?'getting warmer':'cooling');
+            if (Math.abs(dH)>5) notes.push(dH>0?'more humid':'drier');
+            if (Math.abs(dW)>5) notes.push(dW>0?'winds picking up':'calming');
+            if (notes.length) fxData.txt += `; overall ${notes.join(', ')}.`;
           }
+
           document.getElementById('forecastText').textContent = fxData.txt;
-          document.getElementById('forecastBar').className = fxData.cls;
+          document.getElementById('forecastBar').className  = fxData.cls;
         }
 
-        // Live updates
-        const tEl = document.getElementById('temperature');
-        tEl.textContent = tempC.toFixed(1); tEl.style.color = tempColor(tempC);
-        const hEl = document.getElementById('humidity');
-        hEl.textContent = humPct.toFixed(0);
+        // Apply warnings and update each card
+
+        const setWarn = (id, cond) =>
+          document.getElementById(id).classList.toggle('warning', cond);
+
+        // Temperature
+        document.getElementById('temperature').textContent = tempC.toFixed(1);
+        document.getElementById('temperature').style.color = tempColor(tempC);
+        setWarn('tempCard', tempC > 35);
+
+        // Humidity
+        document.getElementById('humidity').textContent = humPct.toFixed(0);
         let hd, hc;
-        if (humPct < 60)      { hd='Comfortable'; hc='green'; }
-        else if (humPct < 80) { hd='Humid';       hc='orange'; }
-        else                  { hd='Very Humid';  hc='red'; }
-        hEl.style.color = hc; document.getElementById('humDesc').textContent = hd;
+        if (humPct < 60)      { hd = 'Comfortable'; hc = 'green'; }
+        else if (humPct < 80) { hd = 'Humid';       hc = 'orange'; }
+        else                  { hd = 'Very Humid';  hc = 'red'; }
+        document.getElementById('humidity').style.color = hc;
+        document.getElementById('humDesc').textContent = hd;
 
-        const Tf= tempC*9/5+32, Rh=humPct;
-        let Hi = -42.379 + 2.04901523*Tf + 10.14333127*Rh - 0.22475541*Tf*Rh - 0.00683783*Tf*Tf - 0.05481717*Rh*Rh + 0.00122874*Tf*Tf*Rh + 0.00085282*Tf*Rh*Rh - 0.00000199*Tf*Tf*Rh*Rh;
+        // Heat Index
+        const Tf = tempC * 9/5 + 32, Rh = humPct;
+        let Hi = -42.379 + 2.04901523*Tf + 10.14333127*Rh
+               - 0.22475541*Tf*Rh - 0.00683783*Tf*Tf
+               - 0.05481717*Rh*Rh + 0.00122874*Tf*Tf*Rh
+               + 0.00085282*Tf*Rh*Rh - 1.99e-6*Tf*Tf*Rh*Rh;
         if (Hi < Tf) Hi = Tf;
-        const hiC = (Hi - 32)*5/9;
-        const hiEl = document.getElementById('heatIndex'); hiEl.textContent = hiC.toFixed(1);
+        const hiC = (Hi - 32) * 5/9;
+        document.getElementById('heatIndex').textContent = hiC.toFixed(1);
+        setWarn('heatCard', hiC > 42);
         let hid, hic;
-        if (hiC < 27)      { hid='Normal';         hic='green';      }
-        else if (hiC < 32) { hid='Caution';        hic='goldenrod';  }
-        else if (hiC < 41) { hid='Extreme Caution';hic='orange';     }
-        else if (hiC < 54) { hid='Danger';         hic='red';        }
-        else               { hid='Extreme Danger'; hic='darkred';   }
-        hiEl.style.color = hic; document.getElementById('heatDesc').textContent = hid;
+        if      (hiC < 27) { hid='Normal'; hic='green'; }
+        else if (hiC < 32) { hid='Caution'; hic='goldenrod'; }
+        else if (hiC < 41) { hid='Extreme Caution'; hic='orange'; }
+        else if (hiC < 54) { hid='Danger'; hic='red'; }
+        else               { hid='Extreme Danger'; hic='darkred'; }
+        document.getElementById('heatIndex').style.color = hic;
+        document.getElementById('heatDesc').textContent = hid;
 
-        document.getElementById('wind').textContent    = windSpd.toFixed(1);
+        // Wind
+        document.getElementById('wind').textContent = windSpd.toFixed(1);
         document.getElementById('windDir').textContent = windDir;
-        document.getElementById('windGust').textContent= `Gust ${windG.toFixed(1)} km/h`;
+        document.getElementById('windGust').textContent = `Gust ${windG.toFixed(1)} km/h`;
+        setWarn('windCard', windSpd > 45);
 
-        document.getElementById('rainRate').textContent     = rate.toFixed(1);
+        // Rain
+        document.getElementById('rainRate').textContent = rate.toFixed(1);
         document.getElementById('rainHourDesc').textContent = rainCategory(rate);
-        document.getElementById('rainDaily').textContent    = `Daily ${daily.toFixed(1)} mm`;
-        document.getElementById('rainMonthly').textContent  = `Monthly ${monthly.toFixed(1)} mm`;
-        if (rate>0) { for (let i=0; i<Math.min(Math.floor(rate*2),20); i++) createRaindrop(); }
+        document.getElementById('rainDaily').textContent = `Daily ${daily.toFixed(1)} mm`;
+        document.getElementById('rainMonthly').textContent = `Monthly ${monthly.toFixed(1)} mm`;
+        const last3m = R.filter(e => now-e.t <= 3*60*1000);
+        const avg3m  = last3m.reduce((s,e)=>s+e.r,0)/(last3m.length||1);
+        setWarn('rainCard', avg3m > 15);
+        if (rate > 0) for (let i=0; i<Math.min(Math.floor(rate*2),20); i++) createRaindrop();
 
-        document.getElementById('pressure').textContent   = pres.toFixed(2);
-        document.getElementById('uv').textContent         = uvIdx;
-        document.getElementById('radiation').textContent  = rad;
+        // Pressure
+        document.getElementById('pressure').textContent = pres.toFixed(2);
 
-        document.getElementById('updatedAt').textContent = `Updated: ${tsDate(ts)} ${tsTime(ts)}`;
+        // UV Index
+        document.getElementById('uv').textContent = uvIdx;
+        let uvDesc;
+        if      (uvIdx <= 2)  uvDesc = 'Low risk';
+        else if (uvIdx <= 5)  uvDesc = 'Moderate risk';
+        else if (uvIdx <= 7)  uvDesc = 'High risk';
+        else if (uvIdx <=10)  uvDesc = 'Very high risk';
+        else                  uvDesc = 'Extreme risk';
+        document.getElementById('uvDesc').textContent = uvDesc;
+        const uvCard = document.getElementById('uvCard');
+        let uvBg;
+        if      (uvIdx <= 2)  uvBg = 'rgb(103, 190, 77)';
+        else if (uvIdx <= 5)  uvBg = 'rgb(252, 189, 34)';
+        else if (uvIdx <= 7)  uvBg = 'rgb(246, 107, 52)';
+        else if (uvIdx <=10)  uvBg = 'rgb(238, 21, 74)';
+        else                  uvBg = 'rgb(123, 67, 156)';
+        uvCard.style.background = uvBg;
+
+        // Radiation
+        document.getElementById('radiation').textContent = rad;
+        const radCard = document.getElementById('radCard');
+        if (rad <= 0) {
+          radCard.style.background = 'rgb(200,200,200)';
+        } else {
+          const ratio = Math.min(rad / 1200, 1);
+          const g = Math.round(255 * (1 - ratio));
+          radCard.style.background = `rgb(255,${g},0)`;
+        }
+
+        // Timestamp
+        document.getElementById('updatedAt').textContent =
+          `Updated: ${tsDate(ts)} ${tsTime(ts)}`;
+
       } catch (err) {
         console.error(err);
         const bar = document.getElementById('forecastBar');
@@ -283,10 +377,11 @@
         bar.className   = 'bad';
       }
     }
-    // Initial & intervals
+
+    // Initial fetch & intervals
     fetchData();
-    setInterval(() => fetchData(true), 60000);
-    setInterval(() => fetchData(false), 15*60*1000);
+    setInterval(() => fetchData(true), 60_000);
+    setInterval(() => fetchData(false), 15 * 60_000);
   </script>
 </body>
 </html>
